@@ -11,7 +11,7 @@
 :root {
   --bg: #f4f2fa; --panel: #ffffff; --panel-2: #f8f7fc; --line: #e4e0f0; --text: #1d1830; --muted: #6d6789;
   --side: #17122b; --side-text: #cfc8ea; --side-muted: #8a82ab; --side-active: #2a2247;
-  --gem: #7c5cff; --gem-soft: #eeeaff; --farm: #2f9e5b; --farm-soft: #e3f5ea;
+  --gem: #7c5cff; --gem-soft: #eeeaff; --farm: #2f9e5b; --farm-soft: #e3f5ea; --art: #d0602c; --art-soft: #fbebe2;
   --accent: var(--gem); --accent-soft: var(--gem-soft);
   --ok: #1f9d55; --warn: #d97706; --err: #dc2626; --gold: #f5b82e;
   --shadow: 0 1px 2px rgba(20,10,50,.06), 0 8px 24px rgba(20,10,50,.06);
@@ -21,7 +21,7 @@
   :root {
     --bg: #100c1e; --panel: #1a1530; --panel-2: #211b3b; --line: #2e2750; --text: #ece8ff; --muted: #9a93bd;
     --side: #0b0816; --side-active: #221b3d;
-    --gem-soft: #2a2152; --farm-soft: #173726;
+    --gem-soft: #2a2152; --farm-soft: #173726; --art-soft: #3a2219;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
   }
 }
@@ -29,6 +29,7 @@
 html, body { margin: 0; height: 100%; }
 body { background: var(--bg); color: var(--text); font: 15px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; }
 body[data-game="nong-trai"] { --accent: var(--farm); --accent-soft: var(--farm-soft); }
+body[data-game="ve-tranh"] { --accent: var(--art); --accent-soft: var(--art-soft); }
 h1, h2, h3, .brand { font-family: "Baloo 2", "Segoe UI", sans-serif; letter-spacing: .2px; }
 h1 { font-size: 30px; margin: 0; line-height: 1.1; }
 h2 { font-size: 19px; margin: 0 0 12px; }
@@ -87,7 +88,8 @@ textarea { resize: vertical; min-height: 64px; }
 .seg button { border: 0; background: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); font-size: 13.5px; }
 .seg button.on { background: var(--panel); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
 
-.games { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.games { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.games .game-card { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px; }
 .game-card { border: 2px solid var(--line); border-radius: 12px; padding: 12px; cursor: pointer; background: var(--panel-2); display: flex; gap: 10px; align-items: center; text-align: left; }
 .game-card .gi { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: none; }
 .game-card b { display: block; font-size: 14px; }
@@ -96,6 +98,8 @@ textarea { resize: vertical; min-height: 64px; }
 .game-card[data-g="nong-trai"] .gi { background: var(--farm-soft); color: var(--farm); }
 .game-card.on[data-g="kim-cuong"] { border-color: var(--gem); }
 .game-card.on[data-g="nong-trai"] { border-color: var(--farm); }
+.game-card[data-g="ve-tranh"] .gi { background: var(--art-soft); color: var(--art); }
+.game-card.on[data-g="ve-tranh"] { border-color: var(--art); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .chip { border: 1px solid var(--line); background: var(--panel-2); border-radius: 99px; padding: 3px 11px; font-size: 12.5px; cursor: pointer; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -128,6 +132,8 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
 .job .gi { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; }
 .job[data-g="kim-cuong"] .gi { background: var(--gem-soft); color: var(--gem); }
 .job[data-g="nong-trai"] .gi { background: var(--farm-soft); color: var(--farm); }
+.job[data-g="ve-tranh"] .gi { background: var(--art-soft); color: var(--art); }
+.job[data-g="ve-tranh"] .bar i { background: var(--art); }
 .job .t { font-weight: 600; }
 .job .s { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 .bar { height: 6px; background: var(--panel-2); border-radius: 99px; overflow: hidden; margin-top: 7px; border: 1px solid var(--line); }
@@ -140,6 +146,7 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
 .pill.error { color: var(--err); border-color: color-mix(in srgb, var(--err) 40%, transparent); }
 .pill.gem { background: var(--gem-soft); color: var(--gem); border-color: transparent; }
 .pill.farm { background: var(--farm-soft); color: var(--farm); border-color: transparent; }
+.pill.art { background: var(--art-soft); color: var(--art); border-color: transparent; }
 .pill.posted { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); border-color: transparent; }
 
 .lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
@@ -224,6 +231,17 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
 .kho-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
 .kho-grid .vthumb { aspect-ratio: 9/16; }
 .kho-grid .vbody { padding: 10px 12px; font-size: 12.5px; }
+/* ---------- vẽ tranh ---------- */
+.tranh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; padding: 8px; border: 2px dashed var(--line); border-radius: 12px; min-height: 110px; transition: border-color .15s, background .15s; }
+.tranh-grid.drop { border-color: var(--accent); background: var(--accent-soft); }
+.tranh-grid .empty { grid-column: 1 / -1; display: grid; place-items: center; color: var(--muted); font-size: 13px; text-align: center; padding: 14px; }
+.tranh { position: relative; border: 2px solid var(--line); border-radius: 10px; overflow: hidden; padding: 0; cursor: pointer; background: var(--panel-2); aspect-ratio: 3/4; }
+.tranh img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tranh.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.tranh .x { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: rgba(0,0,0,.6); color: #fff; font-size: 14px; line-height: 22px; cursor: pointer; opacity: 0; transition: opacity .15s; padding: 0; }
+.tranh:hover .x { opacity: 1; }
+.cat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cat-row label { font-size: 12.5px; color: var(--muted); }
 .buoc { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font: 800 13px "Baloo 2", sans-serif; margin-right: 6px; }
 @media (max-width: 900px) { .so-sanh { grid-template-columns: 1fr; } }
 </style>
@@ -260,6 +278,34 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
             <div class="games" id="gamePick">
               <button class="game-card on" data-g="kim-cuong"><div class="gi"><svg width="20" height="20" viewBox="0 0 32 32"><path d="M16 3l11 10-11 16L5 13z" fill="currentColor"/></svg></div><div><b>Kim Cương TEE</b><span>Bom · mưa bom</span></div></button>
               <button class="game-card" data-g="nong-trai"><div class="gi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 21V11M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg></div><div><b>Nông Trại TEE</b><span>Làm giàu từ 40 xu</span></div></button>
+              <button class="game-card" data-g="ve-tranh"><div class="gi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.4 2.6a2 2 0 0 1 2.9 2.9L11 15.8l-3.6.8.8-3.6z"/><path d="M7 17c-2 0-3.5 1.4-3.5 3.5h4c1.4 0 2.5-1.1 2.5-2.5"/></svg></div><div><b>Vẽ Tranh TEE</b><span>Tự vẽ lại tranh</span></div></button>
+            </div>
+
+            <div id="artBox" hidden>
+              <div class="row" style="margin:14px 0 6px"><label class="f" style="margin:0">Tranh</label><div class="spacer"></div>
+                <button class="btn sm" id="btnTranhUp" type="button">+ Tải ảnh lên</button>
+                <button class="btn sm" id="btnTranhMo" type="button" title="Mở thư mục ảnh trong Explorer">Thư mục</button></div>
+              <input type="file" id="tranhFile" accept=".jpg,.jpeg,.png,.webp" multiple hidden>
+              <div class="tranh-grid" id="tranhGrid"></div>
+              <div class="hint" id="tranhName">Kéo thả ảnh vào khung trên, hoặc bấm “Tải ảnh lên”. Tranh rõ viền, nền đơn giản thì nét sạch hơn.</div>
+
+              <label class="f">Cắt bỏ watermark (% chiều cao ảnh)</label>
+              <div class="cat-row">
+                <label>Phía trên <input type="number" id="fCatTop" min="0" max="30" step="0.5" value="0"></label>
+                <label>Phía dưới <input type="number" id="fCatBot" min="0" max="30" step="0.5" value="0"></label>
+              </div>
+              <div class="hint">Nhớ riêng cho từng tranh. Ví dụ ảnh có chữ “AI” ở góc trên và watermark ở đáy: trên 4.5, dưới 6. Bấm Xem thử để kiểm tra.</div>
+
+              <label class="f">Tốc độ vẽ</label>
+              <div class="seg" id="artSpeed"><button data-s="1" class="on">Như người thật</button><button data-s="1.5">Nhanh hơn</button><button data-s="2.5">Nhanh</button><button data-s="4">Rất nhanh</button></div>
+              <div class="hint">Mặc định vẽ chậm như tay người: từng nét một, nhấc bút, thỉnh thoảng dừng ngắm tranh.</div>
+
+              <label class="f">Độ dài video</label>
+              <div class="seg" id="artDur"><button data-d="0" class="on">Tự nhiên</button><button data-d="180">Ép 3 phút</button><button data-d="300">Ép 5 phút</button><button data-d="600">Ép 10 phút</button></div>
+              <div class="hint" id="artDurHint">Tự nhiên = dài theo nhịp tay người, tranh càng nhiều nét càng dài (thường 8–15 phút). Bấm Xem thử để biết độ dài.</div>
+
+              <label class="row" style="margin-top:12px;font-size:14px;cursor:pointer;flex-wrap:nowrap"><input type="checkbox" id="fChiRender"> Chỉ render
+                <input type="number" id="fChiGiay" value="30" min="5" style="width:80px"> giây đầu (duyệt nhịp nhanh)</label>
             </div>
 
             <div id="tplBox">
@@ -269,12 +315,13 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
               <div class="hint" id="tplName"></div>
             </div>
 
-            <label class="f" for="fSeed">Seed (số ván)</label>
+            <label class="f" for="fSeed" id="seedLabel">Seed (số ván)</label>
             <div class="row" style="flex-wrap:nowrap">
               <input type="number" id="fSeed" min="0" value="7">
               <button class="btn icon-btn" id="btnDice" title="Seed ngẫu nhiên"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg></button>
             </div>
 
+            <div id="shortBox">
             <label class="f" for="fHook">Câu hook (đầu video)</label>
             <input type="text" id="fHook">
             <div class="chips" id="hookChips"></div>
@@ -288,6 +335,7 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
               <input type="number" id="fDuration" value="50" min="8" max="180" style="width:90px">
             </div>
             <div class="hint">Thử nghiệm dùng 20 giây cho nhanh. Video 3 phút render mất khoảng 2 phút.</div>
+            </div>
 
             <div id="speedBox">
               <label class="f">Tốc độ chơi</label>
@@ -313,10 +361,19 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
 
           <div class="card">
             <h2>Render hàng loạt</h2>
+            <div id="artBatch" hidden>
+              <label class="f">Tranh</label>
+              <div class="seg" id="artBatchWhich"><button data-v="all" class="on">Tất cả tranh</button><button data-v="one">Chỉ tranh đang chọn</button></div>
+              <label class="f" for="fArtSeeds">Seed cho mỗi tranh</label>
+              <input type="text" id="fArtSeeds" placeholder="ví dụ: 1 hoặc 1-3" value="1">
+              <div class="hint">Mỗi seed ra một thứ tự vẽ / vệt cọ khác nhau trên cùng một tranh. Tốc độ, độ dài, cắt watermark lấy theo phần trên.</div>
+            </div>
+            <div id="shortBatch">
             <label class="f" for="fSeeds">Danh sách seed</label>
             <input type="text" id="fSeeds" placeholder="ví dụ: 1-10, 25, 42" value="1-10">
             <label class="row" style="margin-top:12px;font-size:14px;cursor:pointer"><input type="checkbox" id="fRotate" checked> Mỗi video một câu hook khác (xoay vòng danh sách hook)</label>
             <label class="row" style="margin-top:6px;font-size:14px;cursor:pointer" id="rotTplRow"><input type="checkbox" id="fRotateTpl" checked> Mỗi video một template khác (xoay vòng 9 mẫu)</label>
+            </div>
             <div class="hint" id="batchHint"></div>
             <div class="row" style="margin-top:14px"><button class="btn primary" id="btnBatch">Thêm vào hàng đợi</button></div>
           </div>
@@ -372,7 +429,7 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
         </div>
       </div>
       <div class="row" style="margin-bottom:18px">
-        <div class="seg" id="libGame"><button data-v="" class="on">Tất cả</button><button data-v="kim-cuong">Kim cương</button><button data-v="nong-trai">Nông trại</button></div>
+        <div class="seg" id="libGame"><button data-v="" class="on">Tất cả</button><button data-v="kim-cuong">Kim cương</button><button data-v="nong-trai">Nông trại</button><button data-v="ve-tranh">Vẽ tranh</button></div>
         <div class="seg" id="libPosted"><button data-v="" class="on">Mọi trạng thái</button><button data-v="no">Chưa đăng</button><button data-v="yes">Đã đăng</button></div>
         <input type="text" id="libSearch" placeholder="Tìm theo hook hoặc seed…" style="max-width:260px">
       </div>
@@ -495,10 +552,13 @@ const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = n => Number(n || 0).toLocaleString("vi-VN");
-const GAME_NAME = {"kim-cuong": "Kim cương", "nong-trai": "Nông trại"};
+const GAME_NAME = {"kim-cuong": "Kim cương", "nong-trai": "Nông trại", "ve-tranh": "Vẽ tranh"};
+const GAME_PILL = {"kim-cuong": "gem", "nong-trai": "farm", "ve-tranh": "art"};
+const mmss = sec => { const t = Math.round(+sec || 0); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
 const GAME_ICON = {
   "kim-cuong": '<svg width="18" height="18" viewBox="0 0 32 32"><path d="M16 3l11 10-11 16L5 13z" fill="currentColor"/></svg>',
-  "nong-trai": '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 21V11M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg>'
+  "nong-trai": '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 21V11M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg>',
+  "ve-tranh": '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.4 2.6a2 2 0 0 1 2.9 2.9L11 15.8l-3.6.8.8-3.6z"/><path d="M7 17c-2 0-3.5 1.4-3.5 3.5h4c1.4 0 2.5-1.1 2.5-2.5"/></svg>'
 };
 
 async function api(path, opts = {}) {
@@ -527,6 +587,7 @@ async function busy(btn, fn) {
   finally { btn.disabled = false; btn.innerHTML = html; }
 }
 
+const art = { list: [], pick: "", speed: 1, dur: 0, batch: "all", cats: {} };   // cats: cắt watermark nhớ theo từng tranh
 const state = { info: null, game: "kim-cuong", speed: 1, tune: {}, theme: "dem", items: "kim-cuong", templates: [], jobs: [], library: [], stats: null, scan: null, scanSort: null, statsDirty: false };
 
 /* ---------------- điều hướng ---------------- */
@@ -552,9 +613,16 @@ function setGame(g, fillDefaults = true) {
     $("#fHook").value = def.hook;
     $("#fQuestion").value = def.question;
   }
+  const isArt = g === "ve-tranh";
   $("#speedBox").hidden = g !== "kim-cuong";
   $("#tplBox").hidden = g !== "kim-cuong";
   $("#rotTplRow").hidden = g !== "kim-cuong";
+  $("#shortBox").hidden = isArt;
+  $("#artBox").hidden = !isArt;
+  $("#shortBatch").hidden = isArt;
+  $("#artBatch").hidden = !isArt;
+  $("#seedLabel").textContent = isArt ? "Seed (thứ tự vẽ, vệt cọ)" : "Seed (số ván)";
+  if (isArt && !art.list.length) loadTranh();
   renderHookChips();
   updateBatchHint();
 }
@@ -575,6 +643,16 @@ $("#fDuration").oninput = syncDur;
 function syncDur() { $$("#durSeg button").forEach(b => b.classList.toggle("on", b.dataset.d === $("#fDuration").value)); }
 
 function formParams() {
+  if (state.game === "ve-tranh") return {
+    game: "ve-tranh",
+    seed: parseInt($("#fSeed").value || "1", 10),
+    hook: "", question: "",
+    duration: art.dur,
+    anh: art.pick,
+    cat: catOf(art.pick),
+    toc_do: art.speed,
+    chi_render: $("#fChiRender").checked ? (+$("#fChiGiay").value || 30) : undefined,
+  };
   return {
     game: state.game,
     seed: parseInt($("#fSeed").value || "1", 10),
@@ -667,6 +745,7 @@ $$("#speedSeg button").forEach(b => b.onclick = () => { state.speed = +b.dataset
 const SUMMARY_LABELS = {
   "kim-cuong": [["score", "điểm"], ["moves", "nước đi"], ["explosions", "vụ nổ"], ["max_combo", "combo cao nhất", "x"], ["max_chain", "nổ liên hoàn"]],
   "nong-trai": [["money", "xu cuối ván"], ["harvests", "lần thu hoạch"], ["plots", "ô đất"], ["best_sale", "lần bán đắt nhất"], ["best_crop", "cây xịn nhất"]],
+  "ve-tranh": [["giay_txt", "độ dài video"], ["net_txt", "phác nét"], ["net", "nét bút"], ["vung", "vùng màu"]],
 };
 function renderSummary(game, s) {
   return SUMMARY_LABELS[game].map(([k, label, pre]) =>
@@ -675,15 +754,23 @@ function renderSummary(game, s) {
 
 $("#btnPreview").onclick = e => busy(e.currentTarget, async () => {
   const p = formParams();
+  if (p.game === "ve-tranh" && !p.anh) throw new Error("Chưa chọn tranh — tải ảnh lên rồi bấm chọn một tranh.");
   const d = p.duration;
   const seconds = [3, +(d * 0.3).toFixed(1), +(d * 0.62).toFixed(1), +(d - 1.5).toFixed(1)];
   $$("#phones .phone").forEach(el => el.classList.add("loading"));
   try {
     const r = await api("/api/preview", {body: {...p, seconds}});
     $("#phones").innerHTML = r.images.map(im =>
-      `<div class="phone"><img src="${im.url}" alt=""><span class="sec">${im.sec}s</span></div>`).join("");
+      `<div class="phone"><img src="${im.url}" alt=""><span class="sec">${im.label ? `${esc(im.label)} · ${mmss(im.sec)}` : im.sec + "s"}</span></div>`).join("");
+    if (p.game === "ve-tranh") {
+      r.summary.giay_txt = mmss(r.summary.giay);
+      r.summary.net_txt = mmss(r.summary.giay_net);
+      $("#artDurHint").innerHTML = `Tranh <b>${esc(r.summary.tranh)}</b>: video dài <b>${mmss(r.summary.giay)}</b>`
+        + (p.chi_render ? ` · chỉ render ${p.chi_render} giây đầu` : "") + ". Render mất khoảng 1,5 lần độ dài video.";
+    }
     $("#previewStats").innerHTML = renderSummary(p.game, r.summary);
-    $("#previewInfo").textContent = `${GAME_NAME[p.game]} · seed ${r.seed} · ${d}s`;
+    $("#previewInfo").textContent = p.game === "ve-tranh" ? `Vẽ tranh · ${r.summary.tranh} · seed ${r.seed} · dài ${mmss(r.summary.giay)}`
+      : `${GAME_NAME[p.game]} · seed ${r.seed} · ${d}s`;
   } finally { $$("#phones .phone").forEach(el => el.classList.remove("loading")); }
 });
 
@@ -692,7 +779,11 @@ async function enqueue(items) {
   toast(`Đã thêm ${r.ids.length} video vào hàng đợi`);
   refreshJobs();
 }
-$("#btnRender").onclick = e => busy(e.currentTarget, () => enqueue([formParams()]));
+$("#btnRender").onclick = e => busy(e.currentTarget, () => {
+  const p = formParams();
+  if (p.game === "ve-tranh" && !p.anh) throw new Error("Chưa chọn tranh.");
+  return enqueue([p]);
+});
 
 function parseSeeds(text) {
   const out = [];
@@ -705,6 +796,11 @@ function parseSeeds(text) {
 }
 function batchItems() {
   const base = formParams();
+  if (state.game === "ve-tranh") {
+    const names = art.batch === "all" ? art.list.map(t => t.name) : (art.pick ? [art.pick] : []);
+    const seeds = parseSeeds($("#fArtSeeds").value);
+    return names.flatMap(anh => seeds.map(seed => ({...base, anh, seed, cat: catOf(anh)})));
+  }
   const hooks = hooksFor(state.game);
   const rotate = $("#fRotate").checked && hooks.length;
   const tpls = state.game === "kim-cuong" && $("#fRotateTpl").checked ? state.templates : [];
@@ -716,6 +812,12 @@ function batchItems() {
 }
 function updateBatchHint() {
   const n = batchItems().length;
+  if (state.game === "ve-tranh") {
+    const seeds = parseSeeds($("#fArtSeeds").value).length;
+    $("#batchHint").textContent = n ? `${n} video vẽ tranh (${n / Math.max(1, seeds)} tranh × ${seeds} seed)` : "Chưa có tranh hoặc seed hợp lệ";
+    $("#btnBatch").textContent = n ? `Thêm ${n} video vào hàng đợi` : "Thêm vào hàng đợi";
+    return;
+  }
   const hooks = hooksFor(state.game).length;
   const tplRot = state.game === "kim-cuong" && $("#fRotateTpl").checked;
   $("#batchHint").textContent = n ? `${n} video ${GAME_NAME[state.game]}` + ($("#fRotate").checked && hooks ? `, xoay vòng ${hooks} câu hook` : ", cùng một câu hook")
@@ -723,6 +825,7 @@ function updateBatchHint() {
   $("#btnBatch").textContent = n ? `Thêm ${n} video vào hàng đợi` : "Thêm vào hàng đợi";
 }
 $("#fSeeds").oninput = updateBatchHint;
+$("#fArtSeeds").oninput = updateBatchHint;
 $("#fRotate").onchange = updateBatchHint;
 $("#fRotateTpl").onchange = updateBatchHint;
 $("#btnBatch").onclick = e => { const items = batchItems(); if (!items.length) return toast("Chưa có seed hợp lệ", true); busy(e.currentTarget, () => enqueue(items)); };
@@ -814,7 +917,7 @@ function renderJobs() {
     return `<div class="job" data-g="${j.game}">
       <div class="gi">${GAME_ICON[j.game]}</div>
       <div style="min-width:0">
-        <div class="row" style="gap:8px"><span class="t">${GAME_NAME[j.game]} · seed ${j.params.seed}</span><span class="pill ${cls}">${label}</span><span class="s">${j.params.duration || ""}s</span></div>
+        <div class="row" style="gap:8px"><span class="t">${GAME_NAME[j.game]}${j.params.anh ? " · " + esc(j.params.anh) : ""} · seed ${j.params.seed}</span><span class="pill ${cls}">${label}</span><span class="s">${j.params.chi_render ? j.params.chi_render + "s đầu" : j.params.duration ? j.params.duration + "s" : ""}</span></div>
         <div class="s">${esc(j.params.hook || "")}</div>
         ${j.status === "running" || j.status === "queued" ? `<div class="bar"><i style="width:${pct}%"></i></div>` : ""}
         <div class="s" style="margin-top:4px">${esc(j.summary || "")}${j.summary && j.message ? " · " : ""}${esc(j.message)}</div>
@@ -839,7 +942,7 @@ function renderLibrary() {
   const items = state.library.filter(v =>
     (!libFilter.game || v.game === libFilter.game) &&
     (!libFilter.posted || (libFilter.posted === "yes") === !!v.posted) &&
-    (!q || `${v.hook} ${v.seed} ${v.name}`.toLowerCase().includes(q)));
+    (!q || `${v.hook} ${v.seed} ${v.name} ${v.tranh || ""}`.toLowerCase().includes(q)));
   const posted = state.library.filter(v => v.posted).length;
   $("#libSub").textContent = `${state.library.length} video · ${posted} đã đăng · ${state.library.length - posted} chưa đăng`;
   if (!items.length) {
@@ -849,11 +952,11 @@ function renderLibrary() {
   $("#libGrid").innerHTML = items.map((v, i) => `<div class="vcard">
       <div class="vthumb" data-play="${esc(v.path)}">
         ${v.thumb ? `<img loading="lazy" src="/files/${encodeURI(v.thumb)}" alt="">` : ""}
-        <div class="tags"><span class="pill ${v.game === "nong-trai" ? "farm" : "gem"}">${GAME_NAME[v.game] || "?"}</span>${v.posted ? '<span class="pill posted">Đã đăng</span>' : ""}</div>
+        <div class="tags"><span class="pill ${GAME_PILL[v.game] || "gem"}">${GAME_NAME[v.game] || "?"}</span>${v.posted ? '<span class="pill posted">Đã đăng</span>' : ""}</div>
         <div class="play"><span><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span></div>
       </div>
       <div class="vbody">
-        <div class="hook">${esc(v.hook || v.name)}</div>
+        <div class="hook">${esc(v.hook || (v.tranh ? "Tranh " + v.tranh : v.name))}</div>
         ${v.theme ? `<div class="meta">${esc(tplLabel(v.theme, v.items))}</div>` : ""}
         <div class="meta">Seed ${v.seed ?? "?"}${v.duration ? ` · ${v.duration}s` : ""} · ${(v.size / 1048576).toFixed(1)} MB · ${new Date(v.mtime * 1000).toLocaleString("vi-VN", {dateStyle: "short", timeStyle: "short"})}</div>
         ${v.summary ? `<div class="meta">${esc(v.summary.replace(/^Ván số \d+:\s*/, ""))}</div>` : ""}
@@ -1071,6 +1174,77 @@ setInterval(() => { if (kho.dangChay || $("#page-kho").classList.contains("activ
 khoUoc();
 pollKho();
 
+/* ---------------- vẽ tranh ---------------- */
+const ART_STORE = "xvg-art";
+function catOf(name) { const c = art.cats[name] || [0, 0]; return `${+c[0] || 0},${+c[1] || 0}`; }
+function showCat() { const c = art.cats[art.pick] || [0, 0]; $("#fCatTop").value = c[0] || 0; $("#fCatBot").value = c[1] || 0; }
+function saveArt() {
+  try { localStorage.setItem(ART_STORE, JSON.stringify({pick: art.pick, speed: art.speed, dur: art.dur, cats: art.cats})); } catch {}
+}
+function restoreArt() {
+  try {
+    const a = JSON.parse(localStorage.getItem(ART_STORE) || "null");
+    if (!a) return;
+    art.pick = a.pick || ""; art.speed = +a.speed || 1; art.dur = +a.dur || 0;
+    art.cats = a.cats || {};
+  } catch {}
+  $$("#artSpeed button").forEach(b => b.classList.toggle("on", +b.dataset.s === art.speed));
+  $$("#artDur button").forEach(b => b.classList.toggle("on", +b.dataset.d === art.dur));
+}
+async function loadTranh() {
+  try { art.list = (await api("/api/tranh")).items; } catch (e) { return toast(e.message, true); }
+  if (!art.list.some(t => t.name === art.pick)) art.pick = art.list[0]?.name || "";
+  showCat();
+  renderTranh();
+}
+function renderTranh() {
+  $("#tranhGrid").innerHTML = art.list.length ? art.list.map(t => `<div class="tranh ${t.name === art.pick ? "on" : ""}" data-n="${esc(t.name)}" title="${esc(t.name)}">
+      <img src="${t.url}" alt="" loading="lazy"><button class="x" type="button" data-del="${esc(t.name)}" title="Xoá ảnh">×</button></div>`).join("")
+    : '<div class="empty">Chưa có tranh nào.<br>Kéo thả ảnh vào đây hoặc bấm “+ Tải ảnh lên”.</div>';
+  $$("#tranhGrid .tranh").forEach(el => el.onclick = e => {
+    if (e.target.dataset.del) return;
+    art.pick = el.dataset.n; showCat(); saveArt(); renderTranh(); updateBatchHint();
+  });
+  $$("#tranhGrid [data-del]").forEach(b => b.onclick = async () => {
+    if (!confirm(`Xoá ảnh ${b.dataset.del} khỏi thư mục tranh?`)) return;
+    try { await api("/api/tranh/delete", {body: {name: b.dataset.del}}); toast("Đã xoá ảnh"); loadTranh(); } catch (e) { toast(e.message, true); }
+  });
+  const cur = art.list.find(t => t.name === art.pick);
+  if (cur) $("#tranhName").textContent = `Đang chọn: ${cur.name} · ${(cur.size / 1048576).toFixed(1)} MB · ${art.list.length} tranh trong thư mục`;
+  updateBatchHint();
+}
+function readFile(f) {
+  return new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = bad; r.readAsDataURL(f); });
+}
+async function uploadTranh(files) {
+  files = [...files].filter(f => /\.(jpe?g|png|webp)$/i.test(f.name));
+  if (!files.length) return toast("Chỉ nhận ảnh .jpg, .png, .webp", true);
+  let last = "";
+  for (const f of files) {
+    try { last = (await api("/api/tranh/upload", {body: {files: [{name: f.name, data: await readFile(f)}]}})).names[0]; }
+    catch (e) { toast(`${f.name}: ${e.message}`, true); }
+  }
+  toast(`Đã tải lên ${files.length} ảnh`);
+  if (last) { art.pick = last; showCat(); }
+  saveArt();
+  loadTranh();
+}
+$("#btnTranhUp").onclick = () => $("#tranhFile").click();
+$("#tranhFile").onchange = e => { uploadTranh(e.target.files); e.target.value = ""; };
+$("#btnTranhMo").onclick = () => api("/api/tranh/mo", {body: {}}).catch(e => toast(e.message, true));
+const tg = $("#tranhGrid");
+tg.ondragover = e => { e.preventDefault(); tg.classList.add("drop"); };
+tg.ondragleave = () => tg.classList.remove("drop");
+tg.ondrop = e => { e.preventDefault(); tg.classList.remove("drop"); uploadTranh(e.dataTransfer.files); };
+$$("#artSpeed button").forEach(b => b.onclick = () => { art.speed = +b.dataset.s; $$("#artSpeed button").forEach(x => x.classList.toggle("on", x === b)); saveArt(); });
+$$("#artDur button").forEach(b => b.onclick = () => { art.dur = +b.dataset.d; $$("#artDur button").forEach(x => x.classList.toggle("on", x === b)); saveArt(); });
+$$("#artBatchWhich button").forEach(b => b.onclick = () => { art.batch = b.dataset.v; $$("#artBatchWhich button").forEach(x => x.classList.toggle("on", x === b)); updateBatchHint(); });
+$("#fCatTop").oninput = $("#fCatBot").oninput = () => {
+  if (art.pick) art.cats[art.pick] = [+$("#fCatTop").value || 0, +$("#fCatBot").value || 0];
+  saveArt();
+};
+restoreArt();
+
 /* ---------------- khởi động ---------------- */
 (async function init() {
   try {
@@ -1090,6 +1264,8 @@ pollKho();
   setGame("kim-cuong");
   $("#fSeed").value = i.games["kim-cuong"].seed;
   $("#fDuration").value = i.games["kim-cuong"].duration; syncDur();
+  const g0 = new URLSearchParams(location.search).get("game");   // ?game=ve-tranh mở thẳng game đó
+  if (g0 && i.games[g0]) setGame(g0);
   updateBatchHint();
   refreshJobs();
   const page = location.hash.slice(1);

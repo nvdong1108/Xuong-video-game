@@ -8,6 +8,7 @@ Chạy:
 Chỉ dùng thư viện chuẩn của Python (+ pillow/numpy mà các bot đã cần).
 """
 import argparse
+import base64
 import csv
 import importlib.util
 import io
@@ -24,7 +25,7 @@ import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 ROOT = Path(__file__).resolve().parent
 OUTPUT = ROOT / "output"
@@ -37,7 +38,11 @@ STATS_FILE = ROOT / "data" / "so-lieu.csv"
 GAMES = {
     "kim-cuong": {"name": "Kim Cương TEE", "script": ROOT / "kim-cuong" / "gem_bot.py", "cls": "GemGame"},
     "nong-trai": {"name": "Nông Trại Của TEE", "script": ROOT / "nong-trai" / "farm_bot.py", "cls": "FarmGame"},
+    "ve-tranh": {"name": "Vẽ Tranh TEE", "script": ROOT / "ve-tranh" / "draw_bot.py", "cls": "DrawGame"},
 }
+TRANH_DIR = ROOT / "assets" / "ve-tranh" / "tranh"      # ảnh nguồn cho game vẽ tranh
+TRANH_EXT = (".jpg", ".jpeg", ".png", ".webp")
+TEN_TRANH = re.compile(r'^[^\\/:*?"<>|]+\.(jpe?g|png|webp)$', re.I)
 MAX_SCAN = 100
 # Tham số nhịp chơi chỉnh được từ giao diện (chỉ áp dụng nếu game có khóa đó trong CONFIG)
 TUNE_KEYS = ("think_min", "think_max", "touch_time", "swipe_time", "skill", "decoy_chance", "rain_every")
@@ -85,7 +90,66 @@ def build_cfg(mod, params):
         cfg[k] = v
     for k, v in clean_template(mod, params).items():
         cfg[k] = v
+    for k, v in clean_art(cfg, params).items():
+        cfg[k] = v
     return cfg
+
+
+def tranh_path(name):
+    """Ảnh trong thư mục tranh — chỉ nhận TÊN FILE trần."""
+    name = str(name or "").strip()
+    if not TEN_TRANH.match(name) or name.startswith("."):
+        raise ValueError("Tên ảnh không hợp lệ")
+    p = TRANH_DIR / name
+    if not p.is_file():
+        raise ValueError(f"Không thấy ảnh {name} trong {TRANH_DIR}")
+    return p
+
+
+def clean_art(cfg, params):
+    """Tham số riêng game vẽ tranh (chỉ game có khóa `anh`)."""
+    out = {}
+    if "anh" not in cfg:
+        return out
+    if params.get("anh"):
+        out["anh"] = str(tranh_path(params["anh"]))
+    cat = re.findall(r"\d+(?:\.\d+)?", str(params.get("cat") or ""))
+    if cat:
+        top, bot = (min(30.0, float(x)) for x in (cat + ["0"])[:2])
+        out["cat"] = f"{top:g},{bot:g}"
+    if params.get("toc_do") not in (None, ""):
+        out["toc_do"] = max(0.3, min(5.0, float(params["toc_do"])))
+    if params.get("chi_render") not in (None, "", 0):
+        out["chi_render"] = max(5.0, float(params["chi_render"]))
+    return out
+
+
+def list_tranh():
+    TRANH_DIR.mkdir(parents=True, exist_ok=True)
+    out = []
+    for p in sorted(TRANH_DIR.iterdir(), key=lambda x: x.name.lower()):
+        if p.suffix.lower() in TRANH_EXT and p.is_file():
+            st = p.stat()
+            out.append({"name": p.name, "size": st.st_size, "mtime": st.st_mtime,
+                        "url": "/assets/ve-tranh/tranh/" + quote(p.name) + f"?v={int(st.st_mtime)}"})
+    return out
+
+
+def save_tranh(name, data_b64):
+    name = re.sub(r'[\\/:*?"<>|]+', "_", Path(str(name or "")).name).strip() or "tranh.jpg"
+    if not TEN_TRANH.match(name):
+        raise ValueError("Chỉ nhận ảnh .jpg, .png, .webp")
+    raw = base64.b64decode(str(data_b64 or "").split(",")[-1])
+    if len(raw) > 40 * 1024 * 1024:
+        raise ValueError("Ảnh quá lớn (tối đa 40 MB)")
+    TRANH_DIR.mkdir(parents=True, exist_ok=True)
+    p = TRANH_DIR / name
+    stem, n = p.stem, 2
+    while p.exists():                     # trùng tên thì thêm số, không ghi đè
+        p = TRANH_DIR / f"{stem}-{n}{p.suffix}"
+        n += 1
+    p.write_bytes(raw)
+    return p.name
 
 
 def clean_template(mod, params):
@@ -124,6 +188,9 @@ def simulate(key, cfg):
     game = getattr(mod, GAMES[key]["cls"])(cfg).play()
     if key == "kim-cuong":
         summary = {"score": game.score, **game.stats}
+    elif key == "ve-tranh":
+        summary = {"giay": round(game.stats["giay"], 1), "giay_net": round(game.stats["giay_net"], 1),
+                   "net": game.stats["net"], "vung": game.stats["vung"], "tranh": game.path.name}
     else:
         summary = {"money": game.money, "harvests": game.stats["harvests"], "plots": game.stats["plots"],
                    "best_sale": game.stats["best_sale"], "best_crop": mod.CROPS[game.best_crop][0]}
@@ -216,8 +283,11 @@ class JobQueue:
         if p.get("speed") and job.game == "kim-cuong":
             cmd += ["--speed", str(p["speed"])]
         mod_cfg = game_module(job.game).CONFIG
+        art = clean_art(mod_cfg, p)
+        if "anh" in art:
+            cmd += ["--anh", art.pop("anh")]
         for k, v in {**clean_tune(mod_cfg, p.get("tune")), **clean_board(mod_cfg, p),
-                     **clean_template(game_module(job.game), p)}.items():
+                     **clean_template(game_module(job.game), p), **art}.items():
             cmd += ["--set", f"{k}={v}"]
         job.status, job.started, job.message = "running", time.time(), "Đang mô phỏng ván"
         env = dict(os.environ, PYTHONIOENCODING="utf-8")
@@ -261,6 +331,8 @@ class JobQueue:
         meta = {"game": job.game, "seed": seed, "hook": p.get("hook") or "", "question": p.get("question") or "",
                 "duration": float(p.get("duration") or 0) or None, "speed": p.get("speed"), "tune": p.get("tune"),
                 "theme": p.get("theme"), "items": p.get("items"), "summary": job.summary,
+                "tranh": p.get("anh"), "cat": p.get("cat"), "toc_do": p.get("toc_do"),
+                "chi_render": p.get("chi_render"),
                 "created": time.strftime("%Y-%m-%d %H:%M"), "posted": False}
         out.with_suffix(".json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
         make_thumb(out)
@@ -274,6 +346,11 @@ def make_thumb(video):
     ffmpeg = shutil.which("ffmpeg")
     if thumb.exists() or not ffmpeg:
         return
+    if video.name.startswith("ve-tranh"):      # vẽ tranh: bìa là tranh đã xong (cuối video)
+        subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-sseof", "-1.5", "-i", str(video), "-frames:v", "1",
+                        "-vf", "scale=360:-2", str(thumb)], capture_output=True)
+        if thumb.exists():
+            return
     subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-ss", "18", "-i", str(video), "-frames:v", "1",
                     "-vf", "scale=360:-2", str(thumb)], capture_output=True)
     if not thumb.exists():   # video ngắn hơn 18 giây
@@ -640,6 +717,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json({"text": HOOKS_FILE.read_text(encoding="utf-8") if HOOKS_FILE.exists() else ""})
             if path == "/api/stats":
                 return self.send_json(read_stats())
+            if path == "/api/tranh":
+                return self.send_json({"dir": str(TRANH_DIR), "items": list_tranh()})
             self.send_error_json("Không tìm thấy", 404)
         except Exception as e:
             self.send_error_json(str(e), 500)
@@ -656,7 +735,8 @@ class Handler(BaseHTTPRequestHandler):
                         return self.send_error_json("Game không hợp lệ")
                     ids.append(self.jobs.add(it["game"], {k: it.get(k) for k in
                                                           ("seed", "hook", "question", "duration", "speed", "tune", "level",
-                                                           "leaderboard", "theme", "items")}).id)
+                                                           "leaderboard", "theme", "items", "anh", "cat", "toc_do",
+                                                           "chi_render")}).id)
                 return self.send_json({"ids": ids})
             if path == "/api/kho/thu-muc":
                 if self.kho.dang_chay():
@@ -689,6 +769,16 @@ class Handler(BaseHTTPRequestHandler):
                 for duoi in (".mp4", ".json", ".jpg"):
                     (kho / ten).with_suffix(duoi).unlink(missing_ok=True)
                 ghi_lai_manifest(kho)
+                return self.send_json({"ok": True})
+            if path == "/api/tranh/upload":
+                names = [save_tranh(f.get("name"), f.get("data")) for f in (data.get("files") or [])]
+                return self.send_json({"ok": True, "names": names})
+            if path == "/api/tranh/delete":
+                tranh_path(data.get("name")).unlink()
+                return self.send_json({"ok": True})
+            if path == "/api/tranh/mo":
+                TRANH_DIR.mkdir(parents=True, exist_ok=True)
+                open_in_explorer(TRANH_DIR)
                 return self.send_json({"ok": True})
             if path == "/api/jobs/cancel":
                 self.jobs.cancel(int(data["id"]))
@@ -750,6 +840,8 @@ class Handler(BaseHTTPRequestHandler):
                 games[key]["themes"] = {k: v["name"] for k, v in tpl.THEMES.items()}
                 games[key]["items"] = {k: v["name"] for k, v in tpl.ITEM_SETS.items()}
                 games[key]["theme"], games[key]["item_set"] = cfg["theme"], cfg["items"]
+            if "anh" in cfg:
+                games[key]["toc_do"] = cfg["toc_do"]
         text = HOOKS_FILE.read_text(encoding="utf-8") if HOOKS_FILE.exists() else ""
         return {"games": games, "hooks": parse_hooks(text), "ffmpeg": bool(shutil.which("ffmpeg")),
                 "workers": WORKERS, "output": str(OUTPUT)}
@@ -766,11 +858,20 @@ class Handler(BaseHTTPRequestHandler):
             PREVIEW_DIR.mkdir(parents=True, exist_ok=True)
             images = []
             stamp = int(time.time() * 1000)
-            for i, sec in enumerate(data.get("seconds") or [5, 20, 36]):
+            seconds = data.get("seconds") or [5, 20, 36]
+            labels = [None] * len(seconds)
+            if key == "ve-tranh":   # 4 khung theo đúng các bước: đang phác · phác xong · tô mảng · xong
+                g = game
+                seconds = [g.t_s0 + (g.t_s1 - g.t_s0) * 0.4, g.t_s1, (g.t_f0 + g.t_f1) / 2, g.duration - 1]
+                labels = ["Đang phác nét", "Phác xong", "Tô mảng màu", "Hoàn thành"]
+                if cfg.get("chi_render"):
+                    seconds = [min(s, game.total / cfg["fps"] - 0.1) for s in seconds]
+            for i, sec in enumerate(seconds):
                 f = max(0, min(game.total - 1, int(float(sec) * cfg["fps"])))
                 p = PREVIEW_DIR / f"{key}_{i}.jpg"
                 renderer.render(f).convert("RGB").save(p, quality=85)
-                images.append({"sec": float(sec), "url": f"/files/_preview/{p.name}?v={stamp}"})
+                images.append({"sec": round(float(sec), 1), "label": labels[i],
+                               "url": f"/files/_preview/{p.name}?v={stamp}"})
         return {"images": images, "summary": summary, "seed": cfg["seed"]}
 
     def templates(self):

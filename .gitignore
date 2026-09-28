@@ -9,3 +9,5 @@ Thumbs.db
 .DS_Store
 kho-nen/
 data/kho-nen.json
+assets/ve-tranh/tranh/*
+!assets/ve-tranh/tranh/.gitkeep

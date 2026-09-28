@@ -7,6 +7,7 @@ Kế hoạch đầy đủ: [docs/ke-hoach.md](docs/ke-hoach.md).
 | --- | --- | --- |
 | **Kim Cương TEE** (ưu tiên) | [kim-cuong/gem_bot.py](kim-cuong/gem_bot.py) | Bom nổ liên hoàn tới đâu? |
 | **Nông Trại Của TEE** | [nong-trai/farm_bot.py](nong-trai/farm_bot.py) | 50 giây làm giàu từ 40 xu |
+| **Vẽ Tranh TEE** | [ve-tranh/draw_bot.py](ve-tranh/draw_bot.py) | không chữ, không tiếng — để ghép và lồng nhạc |
 
 ## Cấu trúc thư mục
 
@@ -16,10 +17,12 @@ xuong-video-game/
 ├── ui/index.html            # trang web của giao diện
 ├── kim-cuong/gem_bot.py     # game kim cương: ghép 3, bom, siêu bom, mưa bom
 ├── nong-trai/farm_bot.py    # game nông trại: gieo, thu hoạch, mở đất, mưa, chợ phiên
+├── ve-tranh/draw_bot.py     # vẽ tranh: bút chì phác từng nét → cọ tô mảng → tô chi tiết
 ├── assets/
 │   ├── fonts/Baloo2.ttf     # font (giấy phép OFL, xem OFL.txt)
 │   ├── kim-cuong/           # đặt PNG tự làm vào đây để thay hình vẽ sẵn (giai đoạn 2)
-│   └── nong-trai/
+│   ├── nong-trai/
+│   └── ve-tranh/tranh/      # ảnh nguồn cho game vẽ tranh (không đưa lên Git)
 ├── data/
 │   ├── hooks.txt            # danh sách câu hook để thử
 │   └── so-lieu.csv          # bảng số liệu test thị trường (giai đoạn 3)
@@ -155,6 +158,40 @@ python tao_kho_nen.py --liet-ke           # kho có bao nhiêu clip / phút khô
   `--khong-hud` bỏ luôn bảng TOP/Level/điểm.
 - Mỗi clip 3 phút tốn ~2 phút CPU. Kho càng lớn thì video dài càng ít lặp: tập 2 tiếng
   cần 40 clip mới không lặp lại clip nào.
+
+## Game vẽ tranh (`ve-tranh/draw_bot.py`)
+
+Tự vẽ lại một bức tranh trên tờ giấy dán băng keo, khung dọc 1080×1920, **không tiếng, không chữ**.
+Nét bút và vùng màu được tách tự động từ ảnh (cần `scipy`).
+
+1. **Phác nét**: bút chì đi từng nét như tay người, đặt bút chậm, giữa nét nhanh tay, cuối nét
+   chậm lại rồi nhấc bút, cứ 25–45 nét lại dừng ngắm. Nét dài (dáng chính) trước, nét ngắn sau.
+2. **Tô mảng**: cọ tô từng vùng màu liền nhau, vùng rộng trước.
+3. **Tô chi tiết**: cọ quét lần hai lộ dần tranh thật, nét chì mờ đi.
+4. Giữ tranh hoàn chỉnh 7 giây.
+
+Mặc định **độ dài tự nhiên** theo nhịp tay người: tranh càng nhiều nét càng dài (thường 8–15 phút,
+render mất khoảng 1,5 lần độ dài video).
+
+**Trên giao diện** (Tạo video › Vẽ Tranh TEE, hoặc mở thẳng `http://127.0.0.1:8765/?game=ve-tranh`):
+kéo thả ảnh vào khung Tranh → chọn tranh → nhập % cắt watermark (nhớ riêng từng tranh) → Xem thử
+(4 khung: đang phác · phác xong · tô mảng · hoàn thành, kèm độ dài video) → Render.
+Tick “Chỉ render 30 giây đầu” để duyệt nhịp nhanh. Render hàng loạt: tất cả tranh × danh sách seed.
+
+Dòng lệnh:
+
+```
+cd ve-tranh
+python draw_bot.py --anh tranh.jpg --cat 4.5,6            # cắt 4,5% trên, 6% dưới (bỏ watermark)
+python draw_bot.py --anh tranh.jpg --chi-render 30        # chỉ xuất 30 giây đầu
+python draw_bot.py --anh tranh.jpg --set toc_do=1.5       # nhanh hơn 1,5 lần
+python draw_bot.py --anh tranh.jpg --duration 180         # ép vừa 3 phút
+python draw_bot.py --seed 3                               # không ghi --anh: ảnh thứ (seed) trong assets/ve-tranh/tranh/
+```
+
+Tham số trong `CONFIG`: `toc_do` (nhân tốc độ cả video), `toc_do_but` (điểm ảnh/giây của bút chì),
+`toc_do_co` (của cọ), `net_dai`, `so_mau`, `hold`. Tranh rõ viền, nền đơn giản thì nét sạch hơn.
+Chỉ dùng tranh bạn có quyền dùng (tự tạo bằng AI…), không lấy tranh có watermark của người khác để đăng.
 
 ## Âm thanh và bản quyền
 
