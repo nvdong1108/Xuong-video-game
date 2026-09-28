@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xương · Studio</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 3l11 10-11 16L5 13z' fill='%237c5cff'/><path d='M16 3l5 10H11z' fill='%23b7a6ff'/></svg>">
+<style>
+@font-face { font-family: "Baloo 2"; src: url("/assets/fonts/Baloo2.ttf") format("truetype"); font-weight: 400 800; font-display: swap; }
+
+:root {
+  --bg: #f4f2fa; --panel: #ffffff; --panel-2: #f8f7fc; --line: #e4e0f0; --text: #1d1830; --muted: #6d6789;
+  --side: #17122b; --side-text: #cfc8ea; --side-muted: #8a82ab; --side-active: #2a2247;
+  --gem: #7c5cff; --gem-soft: #eeeaff; --farm: #2f9e5b; --farm-soft: #e3f5ea;
+  --accent: var(--gem); --accent-soft: var(--gem-soft);
+  --ok: #1f9d55; --warn: #d97706; --err: #dc2626; --gold: #f5b82e;
+  --shadow: 0 1px 2px rgba(20,10,50,.06), 0 8px 24px rgba(20,10,50,.06);
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #100c1e; --panel: #1a1530; --panel-2: #211b3b; --line: #2e2750; --text: #ece8ff; --muted: #9a93bd;
+    --side: #0b0816; --side-active: #221b3d;
+    --gem-soft: #2a2152; --farm-soft: #173726;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--text); font: 15px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; }
+body[data-game="nong-trai"] { --accent: var(--farm); --accent-soft: var(--farm-soft); }
+h1, h2, h3, .brand { font-family: "Baloo 2", "Segoe UI", sans-serif; letter-spacing: .2px; }
+h1 { font-size: 30px; margin: 0; line-height: 1.1; }
+h2 { font-size: 19px; margin: 0 0 12px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accent); }
+
+.app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+aside { background: var(--side); color: var(--side-text); padding: 22px 14px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 20px; font-size: 22px; font-weight: 800; color: #fff; }
+.brand small { display: block; font: 500 12px "Segoe UI", sans-serif; color: var(--side-muted); letter-spacing: 1.5px; text-transform: uppercase; }
+.nav { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; border-radius: 10px; background: none; color: var(--side-text); cursor: pointer; text-align: left; font-weight: 500; }
+.nav:hover { background: rgba(255,255,255,.05); }
+.nav.active { background: var(--side-active); color: #fff; }
+.nav svg { width: 19px; height: 19px; flex: none; opacity: .85; }
+.nav .badge { margin-left: auto; background: var(--gem); color: #fff; border-radius: 99px; font-size: 11px; font-weight: 700; padding: 1px 8px; }
+.side-foot { margin-top: auto; font-size: 12px; color: var(--side-muted); padding: 10px 12px; line-height: 1.6; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--ok); }
+.dot.bad { background: var(--err); }
+
+main { padding: 28px 32px 60px; max-width: 1360px; width: 100%; }
+.page { display: none; }
+.page.active { display: block; animation: fade .18s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+.page-head p { margin: 4px 0 0; color: var(--muted); }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+.grid-2 { display: grid; grid-template-columns: minmax(340px, 420px) 1fr; gap: 20px; align-items: start; }
+.stack { display: flex; flex-direction: column; gap: 20px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.spacer { flex: 1; }
+
+label.f { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin: 14px 0 6px; }
+label.f:first-child { margin-top: 0; }
+#speedBox label.f:first-child { margin-top: 18px; }
+input[type=text], input[type=number], select, textarea {
+  width: 100%; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+textarea { resize: vertical; min-height: 64px; }
+.hint { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-weight: 600; white-space: nowrap; transition: transform .06s, background .15s, border-color .15s; }
+.btn:hover { border-color: var(--accent); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; }
+.btn.danger:hover { border-color: var(--err); color: var(--err); }
+.btn.sm { padding: 5px 10px; font-size: 13px; border-radius: 8px; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn svg { width: 16px; height: 16px; }
+.icon-btn { width: 40px; padding: 9px 0; }
+
+.seg { display: inline-flex; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); font-size: 13.5px; }
+.seg button.on { background: var(--panel); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+
+.games { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.game-card { border: 2px solid var(--line); border-radius: 12px; padding: 12px; cursor: pointer; background: var(--panel-2); display: flex; gap: 10px; align-items: center; text-align: left; }
+.game-card .gi { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+.game-card b { display: block; font-size: 14px; }
+.game-card span { font-size: 12px; color: var(--muted); }
+.game-card[data-g="kim-cuong"] .gi { background: var(--gem-soft); color: var(--gem); }
+.game-card[data-g="nong-trai"] .gi { background: var(--farm-soft); color: var(--farm); }
+.game-card.on[data-g="kim-cuong"] { border-color: var(--gem); }
+.game-card.on[data-g="nong-trai"] { border-color: var(--farm); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { border: 1px solid var(--line); background: var(--panel-2); border-radius: 99px; padding: 3px 11px; font-size: 12.5px; cursor: pointer; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip:hover, .chip.on { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
+
+.phones { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.phone { position: relative; aspect-ratio: 9/16; border-radius: 16px; overflow: hidden; background: var(--panel-2); border: 1px solid var(--line); }
+.phone img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.phone .sec { position: absolute; left: 8px; top: 8px; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+.phone.empty { display: grid; place-items: center; color: var(--muted); font-size: 13px; text-align: center; padding: 10px; }
+.phone.loading::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.18) 50%, transparent 70%); background-size: 200% 100%; animation: shimmer 1.1s infinite; }
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+.stats-strip { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; min-width: 110px; }
+.stat b { display: block; font: 800 22px/1.2 "Baloo 2", sans-serif; }
+.stat span { font-size: 12px; color: var(--muted); }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); font-weight: 700; padding: 10px; border-bottom: 1px solid var(--line); white-space: nowrap; user-select: none; }
+th.sort { cursor: pointer; }
+th.sort:hover { color: var(--text); }
+td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+tr:hover td { background: var(--panel-2); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
+.table-wrap { overflow-x: auto; }
+
+.job { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.job:last-child { border-bottom: 0; }
+.job .gi { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; }
+.job[data-g="kim-cuong"] .gi { background: var(--gem-soft); color: var(--gem); }
+.job[data-g="nong-trai"] .gi { background: var(--farm-soft); color: var(--farm); }
+.job .t { font-weight: 600; }
+.job .s { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+.bar { height: 6px; background: var(--panel-2); border-radius: 99px; overflow: hidden; margin-top: 7px; border: 1px solid var(--line); }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s; }
+.job[data-g="nong-trai"] .bar i { background: var(--farm); }
+.job[data-g="kim-cuong"] .bar i { background: var(--gem); }
+.pill { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 99px; background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); }
+.pill.done { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.pill.running { color: var(--gem); border-color: color-mix(in srgb, var(--gem) 40%, transparent); }
+.pill.error { color: var(--err); border-color: color-mix(in srgb, var(--err) 40%, transparent); }
+.pill.gem { background: var(--gem-soft); color: var(--gem); border-color: transparent; }
+.pill.farm { background: var(--farm-soft); color: var(--farm); border-color: transparent; }
+.pill.posted { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); border-color: transparent; }
+
+.lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+.vcard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+.vthumb { position: relative; aspect-ratio: 9/12; background: #000; cursor: pointer; overflow: hidden; }
+.vthumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; transition: transform .3s; }
+.vthumb:hover img { transform: scale(1.03); }
+.vthumb .play { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transition: opacity .15s; background: rgba(0,0,0,.25); }
+.vthumb:hover .play { opacity: 1; }
+.vthumb .play span { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; color: #111; }
+.vthumb .tags { position: absolute; left: 8px; top: 8px; display: flex; gap: 5px; }
+.vbody { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.vbody .hook { font-weight: 600; line-height: 1.35; }
+.vbody .meta { font-size: 12.5px; color: var(--muted); }
+.vactions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; padding-top: 6px; }
+
+.empty-state { text-align: center; color: var(--muted); padding: 50px 20px; }
+.empty-state svg { width: 42px; height: 42px; opacity: .5; margin-bottom: 8px; }
+
+.tpl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tpl { border: 2px solid var(--line); border-radius: 12px; padding: 0; overflow: hidden; background: var(--panel-2); cursor: pointer; text-align: left; transition: border-color .15s, transform .1s; }
+.tpl:hover { transform: translateY(-1px); }
+.tpl.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.tpl .ti { aspect-ratio: 270/390; background: var(--line); display: block; width: 100%; object-fit: cover; }
+.tpl span { display: block; padding: 5px 7px 6px; font-size: 11.5px; line-height: 1.3; color: var(--muted); }
+.tpl span b { color: var(--text); font-weight: 600; }
+.tune { margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; padding: 4px 14px 10px; background: var(--panel-2); }
+.tune summary { cursor: pointer; font-weight: 600; font-size: 14px; padding: 8px 0; display: flex; align-items: center; list-style: none; }
+.tune summary::-webkit-details-marker { display: none; }
+.tune summary::before { content: "▸"; margin-right: 8px; color: var(--muted); transition: transform .15s; }
+.tune[open] summary::before { transform: rotate(90deg); }
+.tune summary .btn { margin-left: auto; }
+.tune-row { display: grid; grid-template-columns: 118px 1fr 72px; gap: 4px 10px; align-items: center; padding: 5px 0; font-size: 13.5px; }
+.tune-row span { color: var(--muted); }
+.tune-row output { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.25; }
+.tune-row output em { display: block; font-style: normal; font-weight: 700; font-size: 12px; color: var(--accent); }
+.tune-row input[type=range] { width: 100%; accent-color: var(--accent); }
+.tune-row small { grid-column: 1 / -1; color: var(--muted); font-size: 12px; }
+.stats-table input { background: transparent; border: 1px solid transparent; padding: 5px 7px; border-radius: 7px; min-width: 70px; }
+.stats-table input:hover { border-color: var(--line); }
+.stats-table input:focus { background: var(--panel-2); }
+.stats-table td { padding: 3px 4px; }
+.stats-table .w-hook input { min-width: 220px; }
+
+.modal { position: fixed; inset: 0; background: rgba(6,4,14,.78); display: none; place-items: center; z-index: 50; padding: 20px; }
+.modal.open { display: grid; }
+.modal video { max-height: 88vh; max-width: 92vw; border-radius: 14px; background: #000; }
+.modal .close { position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,.12); color: #fff; border: 0; width: 42px; height: 42px; border-radius: 50%; font-size: 22px; cursor: pointer; }
+
+.toasts { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 60; }
+.toast { background: var(--side); color: #fff; padding: 11px 16px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.25); font-size: 14px; max-width: 360px; animation: fade .2s; }
+.toast.err { background: var(--err); }
+
+.spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: rot .7s linear infinite; }
+.btn:not(.primary) .spin { border-color: var(--line); border-top-color: var(--accent); }
+@keyframes rot { to { transform: rotate(360deg); } }
+
+@media (max-width: 1100px) { .grid-2 { grid-template-columns: 1fr; } }
+@media (max-width: 780px) {
+  .app { grid-template-columns: 1fr; }
+  aside { position: static; height: auto; flex-direction: row; flex-wrap: wrap; padding: 12px; }
+  .brand { padding: 0 8px; width: 100%; }
+  .nav { width: auto; }
+  .side-foot { display: none; }
+  main { padding: 20px 16px 50px; }
+  .phones { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------- kho nền ---------- */
+.btn[hidden] { display: none; }   /* .btn đặt display:inline-flex nên đè mất thuộc tính hidden */
+.nav-sep { height: 1px; background: rgba(255,255,255,.08); margin: 10px 8px; }
+.nav-note { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--side-muted); padding: 2px 12px 4px; }
+.muc-dich { border-left: 4px solid var(--gold); }
+.muc-dich ol { margin: 8px 0 0; padding-left: 20px; }
+.muc-dich li { margin: 4px 0; }
+.so-sanh { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.so-sanh > div { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-size: 13.5px; }
+.so-sanh b { display: block; margin-bottom: 4px; }
+.so-sanh .ok { border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+.hop-dong { font-family: Consolas, monospace; font-size: 13px; background: var(--panel-2); border: 1px dashed var(--line); border-radius: 10px; padding: 8px 12px; word-break: break-all; flex: 1; }
+.kho-log { font: 12.5px/1.5 Consolas, monospace; background: #0d0a1a; color: #d9d3f5; border-radius: 10px; padding: 10px 12px; max-height: 260px; overflow: auto; white-space: pre-wrap; margin: 12px 0 0; }
+.kho-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.kho-grid .vthumb { aspect-ratio: 9/16; }
+.kho-grid .vbody { padding: 10px 12px; font-size: 12.5px; }
+.buoc { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font: 800 13px "Baloo 2", sans-serif; margin-right: 6px; }
+@media (max-width: 900px) { .so-sanh { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body data-game="kim-cuong">
+<div class="app">
+  <aside>
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 32 32"><path d="M16 3l11 10-11 16L5 13z" fill="#7c5cff"/><path d="M16 3l5 10H11z" fill="#b7a6ff"/></svg>
+      <div>Xương<small>video · game</small></div>
+    </div>
+    <button class="nav active" data-page="create"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>Tạo video</button>
+    <button class="nav" data-page="scan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Dò seed</button>
+    <button class="nav" data-page="queue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Hàng đợi<span class="badge" id="qbadge" hidden>0</span></button>
+    <button class="nav" data-page="library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Thư viện</button>
+    <button class="nav" data-page="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Số liệu</button>
+    <button class="nav" data-page="hooks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h16v11H9l-5 4z"/></svg>Câu hook</button>
+    <div class="nav-sep"></div>
+    <div class="nav-note">Cho video truyện</div>
+    <button class="nav" data-page="kho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></svg>Kho nền<span class="badge" id="khoBadge" hidden>…</span></button>
+    <div class="side-foot" id="sideFoot">Đang kết nối…</div>
+  </aside>
+
+  <main>
+    <!-- ===================== TẠO VIDEO ===================== -->
+    <section class="page active" id="page-create">
+      <div class="page-head">
+        <div><h1>Tạo video</h1><p>Chọn game, seed và câu hook, xem thử vài khung hình rồi đưa vào hàng đợi render.</p></div>
+      </div>
+      <div class="grid-2">
+        <div class="stack">
+          <div class="card">
+            <label class="f">Game</label>
+            <div class="games" id="gamePick">
+              <button class="game-card on" data-g="kim-cuong"><div class="gi"><svg width="20" height="20" viewBox="0 0 32 32"><path d="M16 3l11 10-11 16L5 13z" fill="currentColor"/></svg></div><div><b>Kim Cương TEE</b><span>Bom · mưa bom</span></div></button>
+              <button class="game-card" data-g="nong-trai"><div class="gi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 21V11M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg></div><div><b>Nông Trại TEE</b><span>Làm giàu từ 40 xu</span></div></button>
+            </div>
+
+            <div id="tplBox">
+              <div class="row" style="margin:14px 0 6px"><label class="f" style="margin:0">Template giao diện</label><div class="spacer"></div>
+                <button class="btn sm" id="btnTplRandom" type="button">Ngẫu nhiên</button></div>
+              <div class="tpl-grid" id="tplGrid"></div>
+              <div class="hint" id="tplName"></div>
+            </div>
+
+            <label class="f" for="fSeed">Seed (số ván)</label>
+            <div class="row" style="flex-wrap:nowrap">
+              <input type="number" id="fSeed" min="0" value="7">
+              <button class="btn icon-btn" id="btnDice" title="Seed ngẫu nhiên"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg></button>
+            </div>
+
+            <label class="f" for="fHook">Câu hook (đầu video)</label>
+            <input type="text" id="fHook">
+            <div class="chips" id="hookChips"></div>
+
+            <label class="f" for="fQuestion">Câu hỏi cuối video</label>
+            <textarea id="fQuestion" rows="2"></textarea>
+
+            <label class="f">Độ dài</label>
+            <div class="row">
+              <div class="seg" id="durSeg"><button data-d="20">20s</button><button data-d="30">30s</button><button data-d="50" class="on">50s</button><button data-d="60">60s</button><button data-d="90">90s</button><button data-d="120">2 phút</button><button data-d="180">3 phút</button></div>
+              <input type="number" id="fDuration" value="50" min="8" max="180" style="width:90px">
+            </div>
+            <div class="hint">Thử nghiệm dùng 20 giây cho nhanh. Video 3 phút render mất khoảng 2 phút.</div>
+
+            <div id="speedBox">
+              <label class="f">Tốc độ chơi</label>
+              <div class="seg" id="speedSeg"><button data-s="0.8">Chậm</button><button data-s="1" class="on">Như người thật</button><button data-s="1.3">Nhanh</button><button data-s="1.6">Rất nhanh</button></div>
+              <div class="hint" id="speedHint">Tốc độ nhân lên toàn bộ ván. Nhịp nghĩ / gạt chỉnh riêng ở dưới.</div>
+              <label class="f">HUD bảng xếp hạng</label>
+              <div class="row" style="flex-wrap:nowrap">
+                <input type="number" id="fLevel" min="0" placeholder="Level (tự động)" style="width:150px">
+                <input type="text" id="fTop" placeholder="Top 1 2 3, ví dụ 35400 32000 29030">
+              </div>
+              <div class="hint">Để trống = tự động: Level theo seed, Top 3 đặt quanh điểm cuối ván để người xem hồi hộp.</div>
+              <details class="tune" id="tuneBox" open>
+                <summary>Nhịp chơi của bot <button class="btn sm ghost" id="btnTuneReset" type="button">Mặc định</button></summary>
+                <div id="tuneRows"></div>
+              </details>
+            </div>
+
+            <div class="row" style="margin-top:20px">
+              <button class="btn" id="btnPreview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Xem thử</button>
+              <button class="btn primary" id="btnRender"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Render video</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Render hàng loạt</h2>
+            <label class="f" for="fSeeds">Danh sách seed</label>
+            <input type="text" id="fSeeds" placeholder="ví dụ: 1-10, 25, 42" value="1-10">
+            <label class="row" style="margin-top:12px;font-size:14px;cursor:pointer"><input type="checkbox" id="fRotate" checked> Mỗi video một câu hook khác (xoay vòng danh sách hook)</label>
+            <label class="row" style="margin-top:6px;font-size:14px;cursor:pointer" id="rotTplRow"><input type="checkbox" id="fRotateTpl" checked> Mỗi video một template khác (xoay vòng 9 mẫu)</label>
+            <div class="hint" id="batchHint"></div>
+            <div class="row" style="margin-top:14px"><button class="btn primary" id="btnBatch">Thêm vào hàng đợi</button></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row" style="margin-bottom:14px"><h2 style="margin:0">Xem thử</h2><div class="spacer"></div><span class="hint" id="previewInfo" style="margin:0"></span></div>
+          <div class="phones" id="phones">
+            <div class="phone empty">Bấm “Xem thử” để xem 4 khung hình của ván này</div>
+            <div class="phone empty"></div><div class="phone empty"></div><div class="phone empty"></div>
+          </div>
+          <div class="stats-strip" id="previewStats"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DÒ SEED ===================== -->
+    <section class="page" id="page-scan">
+      <div class="page-head">
+        <div><h1>Dò seed</h1><p>Chạy mô phỏng nhanh nhiều ván (không render) để tìm ván kịch tính nhất.</p></div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="row" style="align-items:flex-end;gap:16px">
+          <div><label class="f">Game</label><div class="seg" id="scanGame"><button data-g="kim-cuong" class="on">Kim cương</button><button data-g="nong-trai">Nông trại</button></div></div>
+          <div><label class="f" for="scanFrom">Từ seed</label><input type="number" id="scanFrom" value="1" style="width:110px"></div>
+          <div><label class="f" for="scanTo">Đến seed</label><input type="number" id="scanTo" value="30" style="width:110px"></div>
+          <div><label class="f" for="scanDur">Độ dài (giây)</label><input type="number" id="scanDur" value="50" style="width:110px"></div>
+          <button class="btn primary" id="btnScan">Dò</button>
+          <div class="spacer"></div>
+          <button class="btn" id="btnScanRender" disabled>Render seed đã chọn</button>
+        </div>
+        <div class="hint">Tối đa 100 seed mỗi lần. Kết quả phụ thuộc độ dài video. Khi render sẽ dùng hook và câu hỏi đang nhập ở trang Tạo video.</div>
+      </div>
+      <div class="card"><div class="table-wrap" id="scanTable"><div class="empty-state">Chưa dò. Chọn khoảng seed rồi bấm “Dò”.</div></div></div>
+    </section>
+
+    <!-- ===================== HÀNG ĐỢI ===================== -->
+    <section class="page" id="page-queue">
+      <div class="page-head">
+        <div><h1>Hàng đợi</h1><p id="queueSub">Các video đang và sẽ render.</p></div>
+        <button class="btn" id="btnClear">Xóa mục đã xong</button>
+      </div>
+      <div class="card" id="jobList"></div>
+    </section>
+
+    <!-- ===================== THƯ VIỆN ===================== -->
+    <section class="page" id="page-library">
+      <div class="page-head">
+        <div><h1>Thư viện</h1><p id="libSub">Video đã render trong thư mục output.</p></div>
+        <div class="row">
+          <button class="btn" id="btnOpenOut">Mở thư mục output</button>
+          <button class="btn" id="btnLibRefresh">Làm mới</button>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:18px">
+        <div class="seg" id="libGame"><button data-v="" class="on">Tất cả</button><button data-v="kim-cuong">Kim cương</button><button data-v="nong-trai">Nông trại</button></div>
+        <div class="seg" id="libPosted"><button data-v="" class="on">Mọi trạng thái</button><button data-v="no">Chưa đăng</button><button data-v="yes">Đã đăng</button></div>
+        <input type="text" id="libSearch" placeholder="Tìm theo hook hoặc seed…" style="max-width:260px">
+      </div>
+      <div class="lib" id="libGrid"></div>
+    </section>
+
+    <!-- ===================== SỐ LIỆU ===================== -->
+    <section class="page" id="page-stats">
+      <div class="page-head">
+        <div><h1>Số liệu</h1><p>Ghi số liệu 48 giờ sau khi đăng. Lưu vào <code>data/so-lieu.csv</code> (mở được bằng Excel).</p></div>
+        <div class="row">
+          <button class="btn" id="btnAddRow">+ Thêm dòng</button>
+          <button class="btn primary" id="btnSaveStats">Lưu</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <h2>Công thức nào giữ người xem tốt nhất?</h2>
+        <div class="table-wrap" id="statsSummary"></div>
+      </div>
+      <div class="card"><div class="table-wrap" id="statsTable"></div></div>
+    </section>
+
+    <!-- ===================== KHO NỀN ===================== -->
+    <section class="page" id="page-kho">
+      <div class="page-head">
+        <div><h1>Kho nền</h1><p>Clip game tự chơi làm <b>nền động</b> cho video đọc truyện — không phải video để đăng.</p></div>
+      </div>
+
+      <div class="card muc-dich" style="margin-bottom:20px">
+        <h2 style="margin-bottom:4px">Mục đích</h2>
+        <div>Video truyện audio (dự án <b>video-ticktok › project_5</b>) dài 1–2 tiếng, trước giờ chỉ có ảnh bìa đứng yên + phụ đề
+          chạy → người nghe dễ chán. Trang này làm sẵn một <b>kho clip game</b> vào một thư mục; lúc dựng video truyện, bên kia
+          <b>tự bốc ngẫu nhiên</b> clip trong kho nối lại làm nền cho đủ độ dài giọng đọc.</div>
+        <ol>
+          <li><b>Chọn thư mục kho</b> (bước ① dưới đây) — nên để ở chỗ cố định, ví dụ <code>D:\KHO-VIDEO\nen-game</code>.</li>
+          <li><b>Làm clip nền</b> (bước ②). Chạy lại bao nhiêu lần cũng được: mỗi lần làm THÊM clip mới, không làm lại clip cũ.</li>
+          <li>Bên <b>video-ticktok</b> khai đường dẫn kho một lần trong <code>.env</code> (dòng ở ô ①), rồi chọn template có nền game và bấm Tạo video như cũ.</li>
+        </ol>
+        <div class="so-sanh">
+          <div><b>“Tạo video” / “Render hàng loạt” — video SHORTS để đăng</b>Có câu hook, màn “HẾT GIỜ! Bình luận dự đoán”, chớp sáng khi nổ. Lưu vào <code>output/</code>. <u>Không dùng làm nền</u> — cứ 3 phút lại hiện màn kêu gọi của game giữa lúc đang đọc truyện.</div>
+          <div class="ok"><b>“Kho nền” — clip NỀN cho video truyện</b>Không hook, không end card, không chớp sáng, băng “MƯA BOM” thu nhỏ; chỗ hook để trống. Tự dò ván kịch tính, xoay đều 9 giao diện, mỗi clip một nhịp chơi. Lưu vào thư mục kho + <code>manifest.json</code>.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="stack">
+          <div class="card">
+            <h2><span class="buoc">1</span>Thư mục kho</h2>
+            <div class="row" style="flex-wrap:nowrap">
+              <input type="text" id="khoPath" placeholder="D:\KHO-VIDEO\nen-game">
+              <button class="btn" id="btnKhoChon" title="Mở hộp thoại chọn thư mục của Windows">📂 Chọn…</button>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn primary" id="btnKhoLuu">Lưu thư mục</button>
+              <button class="btn" id="btnKhoMo">Mở trong Explorer</button>
+            </div>
+            <div class="hint" id="khoPathHint"></div>
+            <label class="f">Bên video-ticktok khai trong <code>.env</code> (một lần):</label>
+            <div class="row" style="flex-wrap:nowrap"><div class="hop-dong" id="khoEnv"></div><button class="btn sm" id="btnKhoCopy">Sao chép</button></div>
+            <div class="hint">Bên đó chỉ đọc <code>manifest.json</code> trong thư mục này. Tên file trong manifest là tên trần (không kèm đường dẫn) ⇒ chép cả thư mục sang ổ/máy khác vẫn dùng được, chỉ cần sửa lại dòng <code>.env</code>.</div>
+          </div>
+
+          <div class="card">
+            <h2><span class="buoc">2</span>Làm clip nền</h2>
+            <label class="f" for="khoSo">Số clip làm THÊM</label>
+            <input type="number" id="khoSo" min="1" max="200" value="9">
+            <div class="hint">9 clip = mỗi giao diện một clip. Video truyện 2 tiếng cần ~40 clip (3 phút) mới không lặp lại clip nào.</div>
+            <label class="f" for="khoVong">Số vòng lặp</label>
+            <input type="number" id="khoVong" min="1" max="50" value="1">
+            <div class="hint">Máy tự làm lại N lần, bấm một lần là xong, khỏi ngồi bấm lại. Ví dụ 9 clip × 10 vòng = 90 clip.
+              Mỗi vòng dò seed → render → vào kho rồi mới sang vòng sau: dừng giữa chừng thì các vòng đã xong vẫn còn.
+              Cả một vòng hỏng hết (hết ổ đĩa…) thì tự dừng, không chạy tiếp các vòng sau.</div>
+            <label class="f">Độ dài mỗi clip</label>
+            <div class="seg" id="khoGiay"><button data-v="120">2 phút</button><button data-v="180" class="on">3 phút</button><button data-v="240">4 phút</button></div>
+            <label class="f" for="khoSongSong">Render cùng lúc</label>
+            <select id="khoSongSong"><option value="1">1 clip</option><option value="2">2 clip</option><option value="3" selected>3 clip</option><option value="4">4 clip</option></select>
+            <label class="row" style="margin-top:12px;font-size:14px;cursor:pointer"><input type="checkbox" id="khoHud" checked> Giữ bảng TOP / Level / điểm trên cùng (sinh động hơn)</label>
+            <div class="hint" id="khoUoc"></div>
+            <div class="row" style="margin-top:14px">
+              <button class="btn primary" id="btnKhoLam">Làm clip nền</button>
+              <button class="btn danger" id="btnKhoDung" hidden>■ Dừng</button>
+            </div>
+            <div id="khoTienDo" hidden>
+              <div class="row" style="margin-top:14px;gap:8px"><span class="pill" id="khoTrangThai"></span><span class="hint" style="margin:0" id="khoDem"></span></div>
+              <div class="bar"><i id="khoBar" style="width:0%"></i></div>
+              <pre class="kho-log" id="khoLog"></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row" style="margin-bottom:12px"><h2 style="margin:0"><span class="buoc">3</span>Kho đang có</h2><div class="spacer"></div>
+            <button class="btn sm" id="btnKhoLamMoi">Làm mới</button></div>
+          <div class="stats-strip" id="khoStats" style="margin-top:0"></div>
+          <div class="chips" id="khoKieu" style="margin:12px 0 16px"></div>
+          <div class="lib kho-grid" id="khoGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HOOK ===================== -->
+    <section class="page" id="page-hooks">
+      <div class="page-head">
+        <div><h1>Câu hook</h1><p>Mỗi dòng một câu. Dòng bắt đầu bằng <code>#</code> là tiêu đề nhóm: “# Kim cương”, “# Nông trại”.</p></div>
+        <button class="btn primary" id="btnSaveHooks">Lưu</button>
+      </div>
+      <div class="grid-2">
+        <div class="card"><textarea id="hooksText" rows="22" style="font-family:Consolas,monospace;font-size:14px"></textarea></div>
+        <div class="card"><h2>Đang dùng</h2><div id="hooksParsed"></div></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="player"><button class="close" aria-label="Đóng">×</button><video controls playsinline></video></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => Number(n || 0).toLocaleString("vi-VN");
+const GAME_NAME = {"kim-cuong": "Kim cương", "nong-trai": "Nông trại"};
+const GAME_ICON = {
+  "kim-cuong": '<svg width="18" height="18" viewBox="0 0 32 32"><path d="M16 3l11 10-11 16L5 13z" fill="currentColor"/></svg>',
+  "nong-trai": '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 21V11M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg>'
+};
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, {
+    method: opts.method || (opts.body ? "POST" : "GET"),
+    headers: {"Content-Type": "application/json"},
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `Lỗi ${r.status}`);
+  return j;
+}
+function toast(msg, err = false) {
+  const t = document.createElement("div");
+  t.className = "toast" + (err ? " err" : "");
+  t.textContent = msg;
+  $("#toasts").append(t);
+  setTimeout(() => t.remove(), err ? 6000 : 3200);
+}
+async function busy(btn, fn) {
+  const html = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>' + btn.textContent.trim();
+  try { return await fn(); }
+  catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.innerHTML = html; }
+}
+
+const state = { info: null, game: "kim-cuong", speed: 1, tune: {}, theme: "dem", items: "kim-cuong", templates: [], jobs: [], library: [], stats: null, scan: null, scanSort: null, statsDirty: false };
+
+/* ---------------- điều hướng ---------------- */
+function go(page) {
+  $$(".nav").forEach(b => b.classList.toggle("active", b.dataset.page === page));
+  $$(".page").forEach(p => p.classList.toggle("active", p.id === "page-" + page));
+  if (page === "library") loadLibrary();
+  if (page === "stats" && !state.stats) loadStats();
+  if (page === "hooks") loadHooks();
+  if (page === "queue") renderJobs();
+  if (page === "kho") loadKho();
+  history.replaceState(null, "", "#" + page);
+}
+$$(".nav").forEach(b => b.onclick = () => go(b.dataset.page));
+
+/* ---------------- tạo video ---------------- */
+function setGame(g, fillDefaults = true) {
+  state.game = g;
+  document.body.dataset.game = g;
+  $$("#gamePick .game-card").forEach(c => c.classList.toggle("on", c.dataset.g === g));
+  const def = state.info?.games[g];
+  if (def && fillDefaults) {
+    $("#fHook").value = def.hook;
+    $("#fQuestion").value = def.question;
+  }
+  $("#speedBox").hidden = g !== "kim-cuong";
+  $("#tplBox").hidden = g !== "kim-cuong";
+  $("#rotTplRow").hidden = g !== "kim-cuong";
+  renderHookChips();
+  updateBatchHint();
+}
+$$("#gamePick .game-card").forEach(c => c.onclick = () => setGame(c.dataset.g));
+
+function hooksFor(g) { return state.info?.hooks[g] || []; }
+function renderHookChips() {
+  const cur = $("#fHook").value.trim();
+  $("#hookChips").innerHTML = hooksFor(state.game).map(h =>
+    `<button class="chip ${h === cur ? "on" : ""}" title="${esc(h)}">${esc(h)}</button>`).join("");
+  $$("#hookChips .chip").forEach(c => c.onclick = () => { $("#fHook").value = c.title; renderHookChips(); });
+}
+$("#fHook").oninput = renderHookChips;
+
+$("#btnDice").onclick = () => { $("#fSeed").value = Math.floor(Math.random() * 9999) + 1; };
+$$("#durSeg button").forEach(b => b.onclick = () => { $("#fDuration").value = b.dataset.d; syncDur(); });
+$("#fDuration").oninput = syncDur;
+function syncDur() { $$("#durSeg button").forEach(b => b.classList.toggle("on", b.dataset.d === $("#fDuration").value)); }
+
+function formParams() {
+  return {
+    game: state.game,
+    seed: parseInt($("#fSeed").value || "1", 10),
+    hook: $("#fHook").value.trim(),
+    question: $("#fQuestion").value.trim(),
+    duration: parseFloat($("#fDuration").value || "50"),
+    speed: state.game === "kim-cuong" ? state.speed : undefined,
+    tune: state.game === "kim-cuong" ? {...state.tune} : undefined,
+    level: state.game === "kim-cuong" ? $("#fLevel").value : undefined,
+    theme: state.game === "kim-cuong" ? state.theme : undefined,
+    items: state.game === "kim-cuong" ? state.items : undefined,
+    leaderboard: state.game === "kim-cuong" ? $("#fTop").value.trim() : undefined,
+  };
+}
+
+/* template giao diện (kim cương) */
+function tplLabel(theme, items) {
+  const g = state.info?.games["kim-cuong"] || {};
+  return `${g.themes?.[theme] || theme} + ${g.items?.[items] || items}`;
+}
+function tplIndex() { return Math.max(0, state.templates.findIndex(t => t.theme === state.theme && t.items === state.items)); }
+function renderTemplates() {
+  const list = state.templates.length ? state.templates : Object.keys(state.info.games["kim-cuong"].themes)
+    .flatMap(th => Object.keys(state.info.games["kim-cuong"].items).map(it => ({theme: th, items: it})));
+  $("#tplGrid").innerHTML = list.map(t => `<button type="button" class="tpl ${t.theme === state.theme && t.items === state.items ? "on" : ""}" data-th="${t.theme}" data-it="${t.items}">
+      ${t.url ? `<img class="ti" src="${t.url}" alt="" loading="lazy">` : '<i class="ti"></i>'}
+      <span>${esc(tplLabel(t.theme, t.items)).replace(" + ", "<br><b>")}</b></span></button>`).join("");
+  $$("#tplGrid .tpl").forEach(b => b.onclick = () => pickTemplate(b.dataset.th, b.dataset.it));
+  $("#tplName").textContent = "Đang chọn: " + tplLabel(state.theme, state.items);
+}
+function pickTemplate(th, it) {
+  state.theme = th; state.items = it;
+  try { localStorage.setItem("xvg-tpl", JSON.stringify({th, it})); } catch {}
+  renderTemplates();
+}
+$("#btnTplRandom").onclick = () => {
+  const list = state.templates.filter(t => !(t.theme === state.theme && t.items === state.items));
+  const t = list[Math.floor(Math.random() * list.length)];
+  if (t) pickTemplate(t.theme, t.items);
+};
+async function loadTemplates() {
+  renderTemplates();
+  try { state.templates = await api("/api/templates", {body: {}}); renderTemplates(); updateBatchHint(); }
+  catch (e) { toast("Không tạo được ảnh template: " + e.message, true); }
+}
+
+/* nhịp chơi của bot */
+const TUNE = [
+  ["think_min", "Nghĩ ngắn nhất", 0, 4, 0.1, "s", "Bot dừng nhìn bàn trước mỗi nước — người xem đoán lúc này"],
+  ["think_max", "Nghĩ lâu nhất", 0, 5, 0.1, "s", ""],
+  ["touch_time", "Chạm giữ viên", 0.1, 1.5, 0.05, "s", ""],
+  ["swipe_time", "Gạt viên", 0.1, 1.5, 0.05, "s", "Lớn hơn = gạt chậm hơn"],
+  ["skill", "Độ giỏi", 0, 1, 0.05, "%", "100% = luôn chọn nước tốt nhất; thấp hơn = hay đi nước thường như người thật"],
+  ["decoy_chance", "Lưỡng lự", 0, 1, 0.05, "%", "Tỉ lệ ngón tay ghé viên khác trước khi chọn"],
+  ["rain_every", "Mưa bom mỗi", 0, 60, 1, "s", "0 = tắt mưa bom. Video 3 phút nên để 25–30 giây"],
+];
+const TUNE_STORE = "xvg-tune";
+function tuneText(def, v) {
+  if (def[5] === "%") return Math.round(v * 100) + "%";
+  // Tốc độ chơi nhân lên cả ván: hiện thêm thời gian thực tế trong video khi khác 1x
+  const real = state.speed !== 1 && v > 0 ? `<em>→ ${+(v / state.speed).toFixed(2)} s</em>` : "";
+  return v + " s" + real;
+}
+function updateTuneOutputs() {
+  TUNE.forEach(d => { const o = $("#tv-" + d[0]); if (o) o.innerHTML = tuneText(d, state.tune[d[0]]); });
+  const name = $("#speedSeg button.on")?.textContent || "";
+  $("#speedHint").innerHTML = state.speed === 1
+    ? "Tốc độ nhân lên toàn bộ ván (nghĩ, gạt, nổ, rơi, mưa bom). Nhịp chỉnh riêng ở dưới."
+    : `<b>${name} = x${state.speed}</b>: cả ván chạy nhanh/chậm theo hệ số này. Số màu bên phải mỗi thanh là thời gian thực tế trong video.`;
+}
+function renderTune() {
+  $("#tuneRows").innerHTML = TUNE.map(d => `<label class="tune-row"><span>${d[1]}</span>
+      <input type="range" min="${d[2]}" max="${d[3]}" step="${d[4]}" value="${state.tune[d[0]]}" data-k="${d[0]}">
+      <output id="tv-${d[0]}">${tuneText(d, state.tune[d[0]])}</output>${d[6] ? `<small>${d[6]}</small>` : ""}</label>`).join("");
+  $$("#tuneRows input").forEach(inp => inp.oninput = () => {
+    const d = TUNE.find(x => x[0] === inp.dataset.k);
+    state.tune[d[0]] = +inp.value;
+    $("#tv-" + d[0]).innerHTML = tuneText(d, +inp.value);
+    try { localStorage.setItem(TUNE_STORE, JSON.stringify(state.tune)); } catch {}
+  });
+}
+$("#btnTuneReset").onclick = e => {
+  e.preventDefault();
+  state.tune = {...state.info.games["kim-cuong"].tune};
+  try { localStorage.removeItem(TUNE_STORE); } catch {}
+  renderTune();
+};
+$$("#speedSeg button").forEach(b => b.onclick = () => { state.speed = +b.dataset.s; $$("#speedSeg button").forEach(x => x.classList.toggle("on", x === b)); updateTuneOutputs(); });
+
+const SUMMARY_LABELS = {
+  "kim-cuong": [["score", "điểm"], ["moves", "nước đi"], ["explosions", "vụ nổ"], ["max_combo", "combo cao nhất", "x"], ["max_chain", "nổ liên hoàn"]],
+  "nong-trai": [["money", "xu cuối ván"], ["harvests", "lần thu hoạch"], ["plots", "ô đất"], ["best_sale", "lần bán đắt nhất"], ["best_crop", "cây xịn nhất"]],
+};
+function renderSummary(game, s) {
+  return SUMMARY_LABELS[game].map(([k, label, pre]) =>
+    `<div class="stat"><b>${pre || ""}${typeof s[k] === "number" ? fmt(s[k]) : esc(s[k])}</b><span>${label}</span></div>`).join("");
+}
+
+$("#btnPreview").onclick = e => busy(e.currentTarget, async () => {
+  const p = formParams();
+  const d = p.duration;
+  const seconds = [3, +(d * 0.3).toFixed(1), +(d * 0.62).toFixed(1), +(d - 1.5).toFixed(1)];
+  $$("#phones .phone").forEach(el => el.classList.add("loading"));
+  try {
+    const r = await api("/api/preview", {body: {...p, seconds}});
+    $("#phones").innerHTML = r.images.map(im =>
+      `<div class="phone"><img src="${im.url}" alt=""><span class="sec">${im.sec}s</span></div>`).join("");
+    $("#previewStats").innerHTML = renderSummary(p.game, r.summary);
+    $("#previewInfo").textContent = `${GAME_NAME[p.game]} · seed ${r.seed} · ${d}s`;
+  } finally { $$("#phones .phone").forEach(el => el.classList.remove("loading")); }
+});
+
+async function enqueue(items) {
+  const r = await api("/api/jobs", {body: {items}});
+  toast(`Đã thêm ${r.ids.length} video vào hàng đợi`);
+  refreshJobs();
+}
+$("#btnRender").onclick = e => busy(e.currentTarget, () => enqueue([formParams()]));
+
+function parseSeeds(text) {
+  const out = [];
+  for (const part of text.split(/[,;\s]+/).filter(Boolean)) {
+    const m = part.match(/^(\d+)-(\d+)$/);
+    if (m) { let [a, b] = [+m[1], +m[2]]; if (a > b) [a, b] = [b, a]; for (let i = a; i <= b && out.length < 200; i++) out.push(i); }
+    else if (/^\d+$/.test(part)) out.push(+part);
+  }
+  return [...new Set(out)];
+}
+function batchItems() {
+  const base = formParams();
+  const hooks = hooksFor(state.game);
+  const rotate = $("#fRotate").checked && hooks.length;
+  const tpls = state.game === "kim-cuong" && $("#fRotateTpl").checked ? state.templates : [];
+  return parseSeeds($("#fSeeds").value).map((seed, i) => {
+    const it = {...base, seed, hook: rotate ? hooks[i % hooks.length] : base.hook};
+    if (tpls.length) { const t = tpls[(i + tplIndex()) % tpls.length]; it.theme = t.theme; it.items = t.items; }
+    return it;
+  });
+}
+function updateBatchHint() {
+  const n = batchItems().length;
+  const hooks = hooksFor(state.game).length;
+  const tplRot = state.game === "kim-cuong" && $("#fRotateTpl").checked;
+  $("#batchHint").textContent = n ? `${n} video ${GAME_NAME[state.game]}` + ($("#fRotate").checked && hooks ? `, xoay vòng ${hooks} câu hook` : ", cùng một câu hook")
+    + (state.game === "kim-cuong" ? (tplRot ? ", xoay vòng 9 template" : ", cùng template đang chọn") : "") : "Chưa có seed hợp lệ";
+  $("#btnBatch").textContent = n ? `Thêm ${n} video vào hàng đợi` : "Thêm vào hàng đợi";
+}
+$("#fSeeds").oninput = updateBatchHint;
+$("#fRotate").onchange = updateBatchHint;
+$("#fRotateTpl").onchange = updateBatchHint;
+$("#btnBatch").onclick = e => { const items = batchItems(); if (!items.length) return toast("Chưa có seed hợp lệ", true); busy(e.currentTarget, () => enqueue(items)); };
+
+/* ---------------- dò seed ---------------- */
+let scanGame = "kim-cuong";
+$$("#scanGame button").forEach(b => b.onclick = () => { scanGame = b.dataset.g; $$("#scanGame button").forEach(x => x.classList.toggle("on", x === b)); });
+const SCAN_COLS = {
+  "kim-cuong": [["seed", "Seed"], ["score", "Điểm"], ["max_chain", "Nổ liên hoàn"], ["max_combo", "Combo cao nhất"], ["explosions", "Vụ nổ"], ["moves", "Nước đi"]],
+  "nong-trai": [["seed", "Seed"], ["money", "Xu cuối"], ["best_sale", "Bán đắt nhất"], ["harvests", "Thu hoạch"], ["plots", "Ô đất"], ["best_crop", "Cây xịn nhất"]],
+};
+$("#btnScan").onclick = e => busy(e.currentTarget, async () => {
+  const body = {game: scanGame, from: +$("#scanFrom").value, to: +$("#scanTo").value, duration: +$("#scanDur").value || 50, speed: state.speed, tune: scanGame === "kim-cuong" ? {...state.tune} : undefined};
+  const r = await api("/api/scan", {body});
+  state.scan = {game: scanGame, rows: r.rows, duration: body.duration};
+  state.scanSort = {key: SCAN_COLS[scanGame][1][0], dir: -1};
+  renderScan();
+});
+function renderScan() {
+  const s = state.scan;
+  if (!s) return;
+  const cols = SCAN_COLS[s.game];
+  const {key, dir} = state.scanSort;
+  const rows = [...s.rows].sort((a, b) => (typeof a[key] === "string" ? a[key].localeCompare(b[key]) : a[key] - b[key]) * dir);
+  const top = new Set([...s.rows].sort((a, b) => b[cols[1][0]] - a[cols[1][0]]).slice(0, 3).map(r => r.seed));
+  $("#scanTable").innerHTML = `<table><thead><tr><th style="width:30px"><input type="checkbox" id="scanAll"></th>${cols.map(([k, l], i) =>
+      `<th class="sort ${i ? "num" : ""}" data-k="${k}">${l}${k === key ? (dir > 0 ? " ↑" : " ↓") : ""}</th>`).join("")}<th></th></tr></thead><tbody>${
+    rows.map(r => `<tr class="${top.has(r.seed) ? "top" : ""}"><td><input type="checkbox" class="scanPick" value="${r.seed}"></td>${cols.map(([k], i) =>
+      `<td class="${i ? "num" : ""}">${i === 0 ? `<b>${r[k]}</b>` : typeof r[k] === "number" ? fmt(r[k]) : esc(r[k])}</td>`).join("")}
+      <td style="text-align:right;white-space:nowrap"><button class="btn sm" data-prev="${r.seed}">Xem thử</button> <button class="btn sm" data-rend="${r.seed}">Render</button></td></tr>`).join("")}</tbody></table>`;
+  $$("#scanTable th.sort").forEach(th => th.onclick = () => {
+    const k = th.dataset.k;
+    state.scanSort = {key: k, dir: state.scanSort.key === k ? -state.scanSort.dir : -1};
+    renderScan();
+  });
+  $("#scanAll").onchange = e => { $$(".scanPick").forEach(c => c.checked = e.target.checked); updateScanBtn(); };
+  $$(".scanPick").forEach(c => c.onchange = updateScanBtn);
+  $$("#scanTable [data-prev]").forEach(b => b.onclick = () => {
+    if (state.game !== s.game) setGame(s.game);
+    $("#fSeed").value = b.dataset.prev;
+    $("#fDuration").value = s.duration; syncDur();
+    go("create");
+    $("#btnPreview").click();
+  });
+  $$("#scanTable [data-rend]").forEach(b => b.onclick = () => enqueue([scanItem(+b.dataset.rend)]).catch(e => toast(e.message, true)));
+  updateScanBtn();
+}
+function scanItem(seed) {
+  const s = state.scan;
+  const p = formParams();
+  const def = state.info.games[s.game];
+  const sameGame = p.game === s.game;
+  return {game: s.game, seed, duration: s.duration, speed: s.game === "kim-cuong" ? state.speed : undefined, tune: s.game === "kim-cuong" ? {...state.tune} : undefined,
+    theme: s.game === "kim-cuong" ? state.theme : undefined, items: s.game === "kim-cuong" ? state.items : undefined, hook: sameGame ? p.hook : def.hook, question: sameGame ? p.question : def.question};
+}
+function updateScanBtn() {
+  const n = $$(".scanPick:checked").length;
+  $("#btnScanRender").disabled = !n;
+  $("#btnScanRender").textContent = n ? `Render ${n} seed đã chọn` : "Render seed đã chọn";
+}
+$("#btnScanRender").onclick = e => busy(e.currentTarget, () => enqueue($$(".scanPick:checked").map(c => scanItem(+c.value))));
+
+/* ---------------- hàng đợi ---------------- */
+const STATUS = {queued: ["Đang chờ", ""], running: ["Đang chạy", "running"], done: ["Xong", "done"], error: ["Lỗi", "error"], cancelled: ["Đã hủy", ""]};
+let prevJobStatus = {};
+async function refreshJobs() {
+  try { state.jobs = await api("/api/jobs"); } catch { return; }
+  for (const j of state.jobs) {
+    const was = prevJobStatus[j.id];
+    if (was && was !== j.status) {
+      if (j.status === "done") { toast(`Xong: ${GAME_NAME[j.game]} seed ${j.params.seed}`); if ($("#page-library").classList.contains("active")) loadLibrary(); }
+      if (j.status === "error") toast(`Lỗi khi render seed ${j.params.seed}: ${j.message}`, true);
+    }
+    prevJobStatus[j.id] = j.status;
+  }
+  const active = state.jobs.filter(j => j.status === "queued" || j.status === "running").length;
+  $("#qbadge").hidden = !active;
+  $("#qbadge").textContent = active;
+  if ($("#page-queue").classList.contains("active")) renderJobs();
+}
+function renderJobs() {
+  const jobs = state.jobs;
+  const active = jobs.filter(j => j.status === "running").length, waiting = jobs.filter(j => j.status === "queued").length;
+  $("#queueSub").textContent = jobs.length ? `${active} đang chạy · ${waiting} đang chờ · render tối đa ${state.info?.workers ?? 2} video cùng lúc` : "Các video đang và sẽ render.";
+  if (!jobs.length) { $("#jobList").innerHTML = '<div class="empty-state">Hàng đợi trống. Tạo video ở trang “Tạo video”.</div>'; return; }
+  $("#jobList").innerHTML = jobs.map(j => {
+    const [label, cls] = STATUS[j.status];
+    const pct = Math.round(j.progress * 100);
+    return `<div class="job" data-g="${j.game}">
+      <div class="gi">${GAME_ICON[j.game]}</div>
+      <div style="min-width:0">
+        <div class="row" style="gap:8px"><span class="t">${GAME_NAME[j.game]} · seed ${j.params.seed}</span><span class="pill ${cls}">${label}</span><span class="s">${j.params.duration || ""}s</span></div>
+        <div class="s">${esc(j.params.hook || "")}</div>
+        ${j.status === "running" || j.status === "queued" ? `<div class="bar"><i style="width:${pct}%"></i></div>` : ""}
+        <div class="s" style="margin-top:4px">${esc(j.summary || "")}${j.summary && j.message ? " · " : ""}${esc(j.message)}</div>
+      </div>
+      <div class="row">${j.status === "done" ? `<button class="btn sm" data-play="${esc(j.out)}">Xem</button>` : ""}
+        ${j.status === "queued" || j.status === "running" ? `<button class="btn sm danger" data-cancel="${j.id}">Hủy</button>` : ""}</div>
+    </div>`;
+  }).join("");
+  $$("#jobList [data-cancel]").forEach(b => b.onclick = () => api("/api/jobs/cancel", {body: {id: +b.dataset.cancel}}).then(refreshJobs));
+  $$("#jobList [data-play]").forEach(b => b.onclick = () => play(b.dataset.play));
+}
+$("#btnClear").onclick = () => api("/api/jobs/clear", {body: {}}).then(refreshJobs);
+setInterval(refreshJobs, 1200);
+
+/* ---------------- thư viện ---------------- */
+const libFilter = {game: "", posted: "", q: ""};
+async function loadLibrary() {
+  try { state.library = await api("/api/library"); renderLibrary(); } catch (e) { toast(e.message, true); }
+}
+function renderLibrary() {
+  const q = libFilter.q.toLowerCase();
+  const items = state.library.filter(v =>
+    (!libFilter.game || v.game === libFilter.game) &&
+    (!libFilter.posted || (libFilter.posted === "yes") === !!v.posted) &&
+    (!q || `${v.hook} ${v.seed} ${v.name}`.toLowerCase().includes(q)));
+  const posted = state.library.filter(v => v.posted).length;
+  $("#libSub").textContent = `${state.library.length} video · ${posted} đã đăng · ${state.library.length - posted} chưa đăng`;
+  if (!items.length) {
+    $("#libGrid").innerHTML = `<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M10 9l5 3-5 3z"/></svg><div>${state.library.length ? "Không có video khớp bộ lọc." : "Chưa có video nào. Render ở trang “Tạo video”."}</div></div>`;
+    return;
+  }
+  $("#libGrid").innerHTML = items.map((v, i) => `<div class="vcard">
+      <div class="vthumb" data-play="${esc(v.path)}">
+        ${v.thumb ? `<img loading="lazy" src="/files/${encodeURI(v.thumb)}" alt="">` : ""}
+        <div class="tags"><span class="pill ${v.game === "nong-trai" ? "farm" : "gem"}">${GAME_NAME[v.game] || "?"}</span>${v.posted ? '<span class="pill posted">Đã đăng</span>' : ""}</div>
+        <div class="play"><span><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span></div>
+      </div>
+      <div class="vbody">
+        <div class="hook">${esc(v.hook || v.name)}</div>
+        ${v.theme ? `<div class="meta">${esc(tplLabel(v.theme, v.items))}</div>` : ""}
+        <div class="meta">Seed ${v.seed ?? "?"}${v.duration ? ` · ${v.duration}s` : ""} · ${(v.size / 1048576).toFixed(1)} MB · ${new Date(v.mtime * 1000).toLocaleString("vi-VN", {dateStyle: "short", timeStyle: "short"})}</div>
+        ${v.summary ? `<div class="meta">${esc(v.summary.replace(/^Ván số \d+:\s*/, ""))}</div>` : ""}
+        <div class="vactions">
+          <button class="btn sm" data-post="${i}">${v.posted ? "Bỏ đánh dấu" : "Đánh dấu đã đăng"}</button>
+          <button class="btn sm" data-stat="${i}" title="Thêm một dòng vào bảng số liệu">+ Số liệu</button>
+          <button class="btn sm" data-folder="${i}" title="Mở thư mục chứa video">Thư mục</button>
+          <button class="btn sm danger" data-del="${i}">Xóa</button>
+        </div>
+      </div></div>`).join("");
+  $$("#libGrid [data-play]").forEach(el => el.onclick = () => play(el.dataset.play));
+  $$("#libGrid [data-post]").forEach(b => b.onclick = async () => {
+    const v = items[+b.dataset.post];
+    await api("/api/library/meta", {body: {path: v.path, posted: !v.posted}});
+    v.posted = !v.posted; renderLibrary();
+  });
+  $$("#libGrid [data-del]").forEach(b => b.onclick = async () => {
+    const v = items[+b.dataset.del];
+    if (!confirm(`Xóa vĩnh viễn video ${v.name}?`)) return;
+    await api("/api/library/delete", {body: {path: v.path}});
+    toast("Đã xóa"); loadLibrary();
+  });
+  $$("#libGrid [data-folder]").forEach(b => b.onclick = () => api("/api/open-folder", {body: {path: items[+b.dataset.folder].path}}));
+  $$("#libGrid [data-stat]").forEach(b => b.onclick = () => addStatFromVideo(items[+b.dataset.stat]));
+}
+function segBind(id, key) {
+  $$(`#${id} button`).forEach(b => b.onclick = () => { libFilter[key] = b.dataset.v; $$(`#${id} button`).forEach(x => x.classList.toggle("on", x === b)); renderLibrary(); });
+}
+segBind("libGame", "game"); segBind("libPosted", "posted");
+$("#libSearch").oninput = e => { libFilter.q = e.target.value; renderLibrary(); };
+$("#btnLibRefresh").onclick = loadLibrary;
+$("#btnOpenOut").onclick = () => api("/api/open-folder", {body: {}});
+
+function play(path) { playUrl("/files/" + encodeURI(path)); }
+function playUrl(url) {
+  const m = $("#player"), v = $("video", m);
+  v.src = url;
+  m.classList.add("open");
+  v.play().catch(() => {});
+}
+function closePlayer() { const m = $("#player"), v = $("video", m); v.pause(); v.removeAttribute("src"); v.load(); m.classList.remove("open"); }
+$("#player .close").onclick = closePlayer;
+$("#player").onclick = e => { if (e.target.id === "player") closePlayer(); };
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePlayer(); });
+
+/* ---------------- số liệu ---------------- */
+const STAT_LABELS = {ngay_dang: "Ngày đăng", nen_tang: "Nền tảng", game: "Game", seed: "Seed", hook: "Hook", do_dai_giay: "Độ dài (s)",
+  luot_xem_48h: "Lượt xem 48h", xem_het_pct: "Xem hết (%)", tb_xem_giay: "TB xem (s)", binh_luan: "Bình luận", follow_moi: "Follow mới", ghi_chu: "Ghi chú"};
+async function loadStats() {
+  try { state.stats = await api("/api/stats"); renderStats(); } catch (e) { toast(e.message, true); }
+}
+function markDirty(d = true) { state.statsDirty = d; $("#btnSaveStats").textContent = d ? "Lưu thay đổi •" : "Lưu"; }
+function renderStats() {
+  const {header, rows} = state.stats;
+  $("#statsTable").innerHTML = `<table class="stats-table"><thead><tr>${header.map(h => `<th>${esc(STAT_LABELS[h] || h)}</th>`).join("")}<th></th></tr></thead><tbody>${
+    rows.map((r, i) => `<tr>${header.map((h, j) => `<td class="${h === "hook" || h === "ghi_chu" ? "w-hook" : ""}"><input data-r="${i}" data-c="${j}" value="${esc(r[j] ?? "")}" ${h === "ngay_dang" ? 'placeholder="yyyy-mm-dd"' : ""}></td>`).join("")}
+      <td><button class="btn sm danger" data-delrow="${i}" title="Xóa dòng">×</button></td></tr>`).join("")}</tbody></table>`;
+  $$("#statsTable input").forEach(inp => inp.oninput = () => { state.stats.rows[+inp.dataset.r][+inp.dataset.c] = inp.value; markDirty(); renderStatsSummary(); });
+  $$("#statsTable [data-delrow]").forEach(b => b.onclick = () => { state.stats.rows.splice(+b.dataset.delrow, 1); markDirty(); renderStats(); });
+  renderStatsSummary();
+}
+function renderStatsSummary() {
+  const {header, rows} = state.stats;
+  const ix = k => header.indexOf(k);
+  const num = v => { const n = parseFloat(String(v).replace(",", ".")); return isNaN(n) ? null : n; };
+  const groups = {};
+  for (const r of rows) {
+    if (num(r[ix("luot_xem_48h")]) === null && num(r[ix("xem_het_pct")]) === null) continue;
+    const key = [r[ix("game")], r[ix("hook")], r[ix("do_dai_giay")]].join("\u0000");
+    (groups[key] ||= []).push(r);
+  }
+  const avg = (list, k) => { const v = list.map(r => num(r[ix(k)])).filter(x => x !== null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+  const out = Object.entries(groups).map(([k, list]) => {
+    const [game, hook, dur] = k.split("\u0000");
+    return {game, hook, dur, n: list.length, views: avg(list, "luot_xem_48h"), done: avg(list, "xem_het_pct"), watch: avg(list, "tb_xem_giay")};
+  }).sort((a, b) => (b.done ?? -1) - (a.done ?? -1));
+  $("#statsSummary").innerHTML = out.length ? `<table><thead><tr><th>Game</th><th>Hook</th><th class="num">Độ dài</th><th class="num">Số video</th><th class="num">Xem hết TB</th><th class="num">Thời gian xem TB</th><th class="num">Lượt xem TB</th></tr></thead><tbody>${
+    out.map((g, i) => `<tr class="${i === 0 ? "top" : ""}"><td>${esc(g.game)}</td><td>${esc(g.hook || "—")}</td><td class="num">${esc(g.dur)}s</td><td class="num">${g.n}</td>
+      <td class="num"><b>${g.done !== null ? g.done.toFixed(1) + "%" : "—"}</b></td><td class="num">${g.watch !== null ? g.watch.toFixed(1) + "s" : "—"}</td><td class="num">${g.views !== null ? fmt(Math.round(g.views)) : "—"}</td></tr>`).join("")}</tbody></table>
+      <div class="hint">Xếp theo tỉ lệ xem hết — chỉ số quan trọng nhất theo kế hoạch.</div>`
+    : '<div class="empty-state" style="padding:20px">Chưa có số liệu. Điền lượt xem và tỉ lệ xem hết vào bảng dưới sau 48 giờ đăng.</div>';
+}
+function newStatRow(v = {}) {
+  const {header} = state.stats;
+  const today = new Date().toISOString().slice(0, 10);
+  const vals = {ngay_dang: today, nen_tang: "TikTok", game: GAME_NAME[v.game] || "", seed: v.seed ?? "", hook: v.hook || "", do_dai_giay: v.duration || ""};
+  return header.map(h => String(vals[h] ?? ""));
+}
+$("#btnAddRow").onclick = () => { state.stats.rows.push(newStatRow()); markDirty(); renderStats(); };
+async function saveStats() { await api("/api/stats", {method: "PUT", body: state.stats}); markDirty(false); toast("Đã lưu số liệu"); }
+$("#btnSaveStats").onclick = e => busy(e.currentTarget, saveStats);
+async function addStatFromVideo(v) {
+  if (!state.stats) state.stats = await api("/api/stats");
+  state.stats.rows.push(newStatRow(v));
+  await saveStats();
+  go("stats"); renderStats();
+}
+window.addEventListener("beforeunload", e => { if (state.statsDirty) { e.preventDefault(); e.returnValue = ""; } });
+
+/* ---------------- hook ---------------- */
+async function loadHooks() {
+  const r = await api("/api/hooks");
+  $("#hooksText").value = r.text;
+  renderParsedHooks();
+}
+function renderParsedHooks() {
+  const h = state.info?.hooks || {};
+  $("#hooksParsed").innerHTML = Object.keys(GAME_NAME).map(g => `<h3 style="margin:6px 0">${GAME_NAME[g]} <span class="pill">${(h[g] || []).length}</span></h3>
+    <ol style="margin:0 0 16px;padding-left:22px;color:var(--muted)">${(h[g] || []).map(x => `<li style="color:var(--text)">${esc(x)}</li>`).join("")}</ol>`).join("");
+}
+$("#btnSaveHooks").onclick = e => busy(e.currentTarget, async () => {
+  const r = await api("/api/hooks", {method: "PUT", body: {text: $("#hooksText").value}});
+  state.info.hooks = r.hooks;
+  renderParsedHooks(); renderHookChips(); updateBatchHint();
+  toast("Đã lưu danh sách hook");
+});
+
+/* ---------------- kho nền ---------------- */
+const kho = {info: null, giay: 180, xongTruoc: -1, dangChay: false, sua: false};
+const KHO_TT = {chay: ["Đang làm", "running"], xong: ["Xong", "done"], loi: ["Có lỗi", "error"], dung: ["Đã dừng", ""], nghi: ["", ""]};
+async function loadKho() {
+  try { kho.info = await api("/api/kho"); } catch (e) { return toast(e.message, true); }
+  const i = kho.info;
+  if (!kho.sua) $("#khoPath").value = i.kho;
+  $("#khoPathHint").textContent = i.kho === i.mac_dinh ? "Đang dùng thư mục mặc định trong dự án. Nên chọn một thư mục cố định bên ngoài." : "";
+  $("#khoEnv").textContent = "P5_GAME_NEN_DIR=" + i.kho;
+  const kieu = Object.keys(i.dem_kieu).length;
+  $("#khoStats").innerHTML = `<div class="stat"><b>${i.so_clip}</b><span>clip</span></div>
+    <div class="stat"><b>${(i.tong_giay / 60).toFixed(0)}</b><span>phút không trùng</span></div>
+    <div class="stat"><b>${kieu}/9</b><span>kiểu giao diện</span></div>
+    <div class="stat"><b>${fmt(Math.round(i.mb))}</b><span>MB</span></div>`;
+  $("#khoKieu").innerHTML = Object.entries(i.dem_kieu).sort().map(([k, n]) => `<span class="chip">${esc(k)} · ${n}</span>`).join("");
+  $("#khoGrid").innerHTML = i.clip.length ? i.clip.map(c => `<div class="vcard">
+      <div class="vthumb" data-kplay="${esc(c.file)}">${c.anh ? `<img loading="lazy" src="/kho-file/${encodeURIComponent(c.anh)}" alt="">` : ""}
+        <div class="play"><span><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span></div></div>
+      <div class="vbody"><b>${esc(c.giao_dien)} + ${esc(c.bo_icon)}</b>
+        <div class="meta">${Math.round(c.giay)}s · x${(c.nhip?.speed || 1).toFixed(2)} · ${c.nhip?.rain_every ? "mưa bom " + c.nhip.rain_every + "s" : "không mưa bom"}</div>
+        <div class="meta">${c.stats?.explosions ?? "?"} nổ · liên hoàn ${c.stats?.max_chain ?? "?"} · ${c.mb} MB</div>
+        <div class="vactions"><button class="btn sm danger" data-kxoa="${esc(c.file)}">Xoá</button></div></div></div>`).join("")
+    : `<div class="empty-state" style="grid-column:1/-1">Kho chưa có clip nào. Chọn thư mục ở bước ① rồi bấm “Làm clip nền”.</div>`;
+  $$("#khoGrid [data-kplay]").forEach(el => el.onclick = () => playUrl("/kho-file/" + encodeURIComponent(el.dataset.kplay)));
+  $$("#khoGrid [data-kxoa]").forEach(b => b.onclick = () => busy(b, async () => {
+    if (!confirm(`Xoá clip ${b.dataset.kxoa} khỏi kho? (xoá cả file mp4)`)) return;
+    await api("/api/kho/xoa", {body: {file: b.dataset.kxoa}}); toast("Đã xoá khỏi kho"); loadKho();
+  }));
+  renderKhoChay(i.chay);
+}
+function renderKhoChay(c) {
+  const chay = c.trang_thai === "chay";
+  $("#btnKhoLam").hidden = chay;
+  $("#btnKhoDung").hidden = !chay;
+  $("#btnKhoLuu").disabled = $("#btnKhoChon").disabled = chay;
+  $("#khoBadge").hidden = !chay;
+  $("#khoBadge").textContent = `${c.xong}/${c.tong}`;
+  $("#khoTienDo").hidden = c.trang_thai === "nghi";
+  if (c.trang_thai !== "nghi") {
+    const [nhan, cls] = KHO_TT[c.trang_thai] || ["", ""];
+    $("#khoTrangThai").textContent = nhan; $("#khoTrangThai").className = "pill " + cls;
+    const vong = c.so_vong > 1 ? `vòng ${c.vong}/${c.so_vong} · ` : "";
+    const moiVong = c.so_moi_vong || c.tong, daDo = c.ke_hoach - (c.vong - 1) * moiVong;
+    const giaiDoan = vong + (chay && daDo < moiVong && c.xong + c.loi < c.ke_hoach ? `đang dò seed ${daDo}/${moiVong} · ` : "") + `${c.xong}/${c.tong} clip xong`;
+    const phut = ((c.ket_thuc || Date.now() / 1000) - c.bat_dau) / 60;
+    $("#khoDem").textContent = `${giaiDoan}${c.loi ? ` · ${c.loi} lỗi` : ""} · ${phut.toFixed(1)} phút`;
+    $("#khoBar").style.width = `${c.tong ? Math.round(100 * (c.xong + c.loi) / c.tong) : 0}%`;
+    const log = $("#khoLog"), cuoi = log.scrollTop + log.clientHeight >= log.scrollHeight - 20;
+    log.textContent = c.log.join("\n");
+    if (cuoi) log.scrollTop = log.scrollHeight;
+    if (kho.dangChay && !chay) toast(c.trang_thai === "xong" ? "Làm kho nền xong" : "Lượt làm kho đã kết thúc: " + nhan, c.trang_thai === "loi");
+  }
+  // cập nhật trạng thái TRƯỚC khi tải lại kho (loadKho gọi lại hàm này — đừng để báo 2 lần)
+  const doiSo = kho.xongTruoc !== -1 && c.xong !== kho.xongTruoc;
+  kho.xongTruoc = c.xong; kho.dangChay = chay;
+  if (doiSo && $("#page-kho").classList.contains("active")) loadKho();
+}
+function khoUoc() {
+  const so1 = Math.max(1, +$("#khoSo").value || 1), vong = Math.max(1, Math.min(50, +$("#khoVong").value || 1));
+  const so = so1 * vong, ss = Math.min(so1, +$("#khoSongSong").value);
+  const phut = vong * (so1 * kho.giay * 0.74 / ss + so1 * 4) / 60;
+  const gio = phut >= 90 ? ` (~${(phut / 60).toFixed(1)} giờ)` : "";
+  $("#khoUoc").textContent = `${vong > 1 ? `${so1} clip × ${vong} vòng = ` : "Thêm "}${so} clip × ${kho.giay / 60} phút = ${(so * kho.giay / 60).toFixed(0)} phút nền mới · ~${Math.round(so * 4.5)} MB · ước ~${Math.ceil(phut)} phút máy chạy${gio} (CPU bận; chạy qua đêm cũng được).`;
+  $("#btnKhoLam").textContent = vong > 1 ? `Làm ${so} clip nền (${vong} vòng)` : `Làm ${so} clip nền`;
+}
+$$("#khoGiay button").forEach(b => b.onclick = () => { kho.giay = +b.dataset.v; $$("#khoGiay button").forEach(x => x.classList.toggle("on", x === b)); khoUoc(); });
+$("#khoSo").oninput = khoUoc; $("#khoVong").oninput = khoUoc; $("#khoSongSong").onchange = khoUoc;
+$("#khoPath").oninput = () => { kho.sua = true; };
+$("#btnKhoChon").onclick = e => busy(e.currentTarget, async () => {
+  toast("Hộp thoại chọn thư mục đã mở (có thể nằm sau cửa sổ trình duyệt)");
+  const r = await api("/api/kho/chon", {body: {}});
+  if (r.kho) { $("#khoPath").value = r.kho; kho.sua = true; toast("Đã chọn — bấm “Lưu thư mục” để dùng"); }
+});
+$("#btnKhoLuu").onclick = e => busy(e.currentTarget, async () => {
+  const r = await api("/api/kho/thu-muc", {body: {kho: $("#khoPath").value}});
+  kho.sua = false; toast("Đã lưu thư mục kho: " + r.kho); loadKho();
+});
+$("#btnKhoMo").onclick = () => api("/api/kho/mo", {body: {}}).catch(e => toast(e.message, true));
+$("#btnKhoCopy").onclick = async () => {
+  const t = $("#khoEnv").textContent;
+  try { await navigator.clipboard.writeText(t); toast("Đã sao chép"); }
+  catch { const r = document.createRange(); r.selectNodeContents($("#khoEnv")); getSelection().removeAllRanges(); getSelection().addRange(r); toast("Đã bôi đen — bấm Ctrl+C", true); }
+};
+$("#btnKhoLam").onclick = e => busy(e.currentTarget, async () => {
+  if (kho.sua && kho.info && $("#khoPath").value.trim() !== kho.info.kho) return toast("Bạn vừa đổi thư mục nhưng chưa bấm “Lưu thư mục”", true);
+  await api("/api/kho/lam", {body: {so: +$("#khoSo").value, vong: +$("#khoVong").value || 1, giay: kho.giay, song_song: +$("#khoSongSong").value, hud: $("#khoHud").checked}});
+  kho.xongTruoc = 0; kho.dangChay = true; toast("Bắt đầu làm clip nền"); pollKho();
+});
+$("#btnKhoDung").onclick = e => busy(e.currentTarget, async () => {
+  if (!confirm("Dừng lượt làm kho? Clip đã xong vẫn giữ, clip đang render dở bị bỏ.")) return;
+  await api("/api/kho/dung", {body: {}}); loadKho();
+});
+$("#btnKhoLamMoi").onclick = loadKho;
+async function pollKho() {
+  try { renderKhoChay(await api("/api/kho/tien-do")); } catch {}
+}
+setInterval(() => { if (kho.dangChay || $("#page-kho").classList.contains("active")) pollKho(); }, 1500);
+khoUoc();
+pollKho();
+
+/* ---------------- khởi động ---------------- */
+(async function init() {
+  try {
+    state.info = await api("/api/info");
+  } catch (e) {
+    $("#sideFoot").innerHTML = '<span class="dot bad"></span>Mất kết nối server'; toast(e.message, true); return;
+  }
+  const i = state.info;
+  $("#sideFoot").innerHTML = `<div><span class="dot ${i.ffmpeg ? "" : "bad"}"></span>${i.ffmpeg ? "ffmpeg sẵn sàng" : "Chưa có ffmpeg!"}</div><div>Render ${i.workers} video cùng lúc</div>`;
+  state.tune = {...i.games["kim-cuong"].tune};
+  try { Object.assign(state.tune, JSON.parse(localStorage.getItem(TUNE_STORE) || "{}")); } catch {}
+  renderTune();
+  const gk = i.games["kim-cuong"];
+  state.theme = gk.theme; state.items = gk.item_set;
+  try { const t = JSON.parse(localStorage.getItem("xvg-tpl") || "null"); if (t && gk.themes[t.th] && gk.items[t.it]) { state.theme = t.th; state.items = t.it; } } catch {}
+  loadTemplates();
+  setGame("kim-cuong");
+  $("#fSeed").value = i.games["kim-cuong"].seed;
+  $("#fDuration").value = i.games["kim-cuong"].duration; syncDur();
+  updateBatchHint();
+  refreshJobs();
+  const page = location.hash.slice(1);
+  if (page && $("#page-" + page)) go(page);
+})();
+</script>
+</body>
+</html>

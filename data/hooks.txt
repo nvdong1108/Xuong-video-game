@@ -1,0 +1,19 @@
+# Câu hook để thử — mỗi dòng một câu. Dùng: python gem_bot.py --hook "..."
+# Kim cương
+Bom nổ liên hoàn tới đâu?
+Ván này được bao nhiêu điểm?
+Mưa bom lần thứ 3 sẽ ra sao?
+Đoán xem combo cao nhất là bao nhiêu?
+Bot này chơi hay hơn bạn không?
+Chờ tới giây thứ 36 nhé...
+Siêu bom nổ một phát sạch bàn?
+50 giây, bao nhiêu vụ nổ?
+Ván này phá kỷ lục không?
+Xem hết mới biết điểm cuối!
+
+# Nông trại
+50 giây làm giàu từ 40 xu
+Từ 40 xu lên bao nhiêu?
+Trồng gì để giàu nhanh nhất?
+Bot làm nông giỏi hơn bạn không?
+Mở hết 20 ô đất kịp không?
