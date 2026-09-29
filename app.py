@@ -42,6 +42,7 @@ GAMES = {
 }
 TRANH_DIR = ROOT / "assets" / "ve-tranh" / "tranh"      # ảnh nguồn cho game vẽ tranh
 TRANH_EXT = (".jpg", ".jpeg", ".png", ".webp")
+VE_TRANH_CAI_DAT = ROOT / "data" / "ve-tranh.json"   # thư mục thêm để dò ảnh đã vẽ
 TEN_TRANH = re.compile(r'^[^\\/:*?"<>|]+\.(jpe?g|png|webp)$', re.I)
 MAX_SCAN = 100
 # Tham số nhịp chơi chỉnh được từ giao diện (chỉ áp dụng nếu game có khóa đó trong CONFIG)
@@ -124,13 +125,55 @@ def clean_art(cfg, params):
     return out
 
 
-def list_tranh():
+def thu_muc_da_ve() -> list:
+    """Nơi tìm video vẽ tranh ĐÃ render: `output/` + các thư mục khai ở
+    `data/ve-tranh.json` {"thu_muc_them": [...]} — video thường được chép sang kho
+    nền (vd H:/KHO-VIDEO/2-ve-tranh) rồi xoá khỏi output, không tìm ở đó thì
+    ảnh đã vẽ lại hiện là "chưa vẽ"."""
+    ds = [OUTPUT]
+    try:
+        them = json.loads(VE_TRANH_CAI_DAT.read_text(encoding="utf-8")).get("thu_muc_them") or []
+        ds += [Path(x) for x in them if x]
+    except (OSError, ValueError):
+        pass
+    return ds
+
+
+def dem_da_ve() -> dict:
+    """{tên ảnh: số video đã vẽ}. Đọc trường `tranh` trong file .json cạnh mỗi mp4
+    (app ghi lúc render xong). Đếm theo TÊN FILE video để một video vừa nằm ở
+    output vừa được chép sang kho không bị tính hai lần."""
+    thay = {}
+    for d in thu_muc_da_ve():
+        if not d.is_dir():
+            continue
+        for j in d.rglob("ve-tranh*.json"):
+            if j.parent.name.startswith("_") or not j.with_suffix(".mp4").is_file():
+                continue
+            try:
+                ten = json.loads(j.read_text(encoding="utf-8")).get("tranh")
+            except (OSError, ValueError):
+                continue
+            if ten:
+                thay.setdefault(ten, set()).add(j.stem)
+    return {k: len(v) for k, v in thay.items()}
+
+
+def list_tranh(jobs=None):
     TRANH_DIR.mkdir(parents=True, exist_ok=True)
+    da_ve = dem_da_ve()
+    # Đang chờ / đang render: tính riêng để bấm "chưa vẽ" hai lần không xếp trùng.
+    dang = {}
+    for j in (jobs.list() if jobs else []):
+        a = (j.get("params") or {}).get("anh")
+        if j.get("game") == "ve-tranh" and a and j.get("status") in ("queued", "running"):
+            dang[a] = dang.get(a, 0) + 1
     out = []
     for p in sorted(TRANH_DIR.iterdir(), key=lambda x: x.name.lower()):
         if p.suffix.lower() in TRANH_EXT and p.is_file():
             st = p.stat()
             out.append({"name": p.name, "size": st.st_size, "mtime": st.st_mtime,
+                        "da_ve": da_ve.get(p.name, 0), "dang_ve": dang.get(p.name, 0),
                         "url": "/assets/ve-tranh/tranh/" + quote(p.name) + f"?v={int(st.st_mtime)}"})
     return out
 
@@ -718,7 +761,8 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/stats":
                 return self.send_json(read_stats())
             if path == "/api/tranh":
-                return self.send_json({"dir": str(TRANH_DIR), "items": list_tranh()})
+                return self.send_json({"dir": str(TRANH_DIR), "items": list_tranh(self.jobs),
+                                       "thu_muc_da_ve": [str(d) for d in thu_muc_da_ve()]})
             self.send_error_json("Không tìm thấy", 404)
         except Exception as e:
             self.send_error_json(str(e), 500)

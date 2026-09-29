@@ -240,6 +240,11 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
 .tranh.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .tranh .x { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: rgba(0,0,0,.6); color: #fff; font-size: 14px; line-height: 22px; cursor: pointer; opacity: 0; transition: opacity .15s; padding: 0; }
 .tranh:hover .x { opacity: 1; }
+.tranh-loc { margin: 0 0 8px; }
+.tranh-loc button b { font-weight: 700; margin-left: 4px; opacity: .75; }
+.tranh .ve { position: absolute; left: 4px; bottom: 4px; padding: 2px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 700; line-height: 18px; color: #fff; background: color-mix(in srgb, var(--ok) 88%, #000); }
+.tranh .ve.dang { background: color-mix(in srgb, var(--warn) 90%, #000); }
+.tranh.da-ve img { filter: saturate(.55) brightness(.8); }
 .cat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .cat-row label { font-size: 12.5px; color: var(--muted); }
 .buoc { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font: 800 13px "Baloo 2", sans-serif; margin-right: 6px; }
@@ -286,6 +291,7 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
                 <button class="btn sm" id="btnTranhUp" type="button">+ Tải ảnh lên</button>
                 <button class="btn sm" id="btnTranhMo" type="button" title="Mở thư mục ảnh trong Explorer">Thư mục</button></div>
               <input type="file" id="tranhFile" accept=".jpg,.jpeg,.png,.webp" multiple hidden>
+              <div class="seg tranh-loc" id="tranhLoc"><button data-v="all" class="on">Tất cả<b id="locAll"></b></button><button data-v="chua">Chưa vẽ<b id="locChua"></b></button><button data-v="da">Đã vẽ<b id="locDa"></b></button></div>
               <div class="tranh-grid" id="tranhGrid"></div>
               <div class="hint" id="tranhName">Kéo thả ảnh vào khung trên, hoặc bấm “Tải ảnh lên”. Tranh rõ viền, nền đơn giản thì nét sạch hơn.</div>
 
@@ -363,7 +369,7 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
             <h2>Render hàng loạt</h2>
             <div id="artBatch" hidden>
               <label class="f">Tranh</label>
-              <div class="seg" id="artBatchWhich"><button data-v="all" class="on">Tất cả tranh</button><button data-v="one">Chỉ tranh đang chọn</button></div>
+              <div class="seg" id="artBatchWhich"><button data-v="all" class="on">Tất cả tranh</button><button data-v="chua">Chỉ tranh chưa vẽ</button><button data-v="one">Chỉ tranh đang chọn</button></div>
               <label class="f" for="fArtSeeds">Seed cho mỗi tranh</label>
               <input type="text" id="fArtSeeds" placeholder="ví dụ: 1 hoặc 1-3" value="1">
               <div class="hint">Mỗi seed ra một thứ tự vẽ / vệt cọ khác nhau trên cùng một tranh. Tốc độ, độ dài, cắt watermark lấy theo phần trên.</div>
@@ -587,7 +593,7 @@ async function busy(btn, fn) {
   finally { btn.disabled = false; btn.innerHTML = html; }
 }
 
-const art = { list: [], pick: "", speed: 1, dur: 0, batch: "all", cats: {} };   // cats: cắt watermark nhớ theo từng tranh
+const art = { list: [], pick: "", speed: 1, dur: 0, batch: "all", loc: "all", cats: {} };   // cats: cắt watermark nhớ theo từng tranh
 const state = { info: null, game: "kim-cuong", speed: 1, tune: {}, theme: "dem", items: "kim-cuong", templates: [], jobs: [], library: [], stats: null, scan: null, scanSort: null, statsDirty: false };
 
 /* ---------------- điều hướng ---------------- */
@@ -778,6 +784,7 @@ async function enqueue(items) {
   const r = await api("/api/jobs", {body: {items}});
   toast(`Đã thêm ${r.ids.length} video vào hàng đợi`);
   refreshJobs();
+  if (items.some(i => i.game === "ve-tranh")) loadTranh();   // hiện ⏳ ngay, khỏi xếp trùng
 }
 $("#btnRender").onclick = e => busy(e.currentTarget, () => {
   const p = formParams();
@@ -797,7 +804,9 @@ function parseSeeds(text) {
 function batchItems() {
   const base = formParams();
   if (state.game === "ve-tranh") {
-    const names = art.batch === "all" ? art.list.map(t => t.name) : (art.pick ? [art.pick] : []);
+    const names = art.batch === "all" ? art.list.map(t => t.name)
+      : art.batch === "chua" ? art.list.filter(chuaVe).map(t => t.name)
+      : (art.pick ? [art.pick] : []);
     const seeds = parseSeeds($("#fArtSeeds").value);
     return names.flatMap(anh => seeds.map(seed => ({...base, anh, seed, cat: catOf(anh)})));
   }
@@ -897,6 +906,7 @@ async function refreshJobs() {
     const was = prevJobStatus[j.id];
     if (was && was !== j.status) {
       if (j.status === "done") { toast(`Xong: ${GAME_NAME[j.game]} seed ${j.params.seed}`); if ($("#page-library").classList.contains("active")) loadLibrary(); }
+      if (j.game === "ve-tranh" && ["done", "error", "cancelled"].includes(j.status)) loadTranh();   // ⏳ → ✓ đã vẽ
       if (j.status === "error") toast(`Lỗi khi render seed ${j.params.seed}: ${j.message}`, true);
     }
     prevJobStatus[j.id] = j.status;
@@ -1197,9 +1207,25 @@ async function loadTranh() {
   showCat();
   renderTranh();
 }
+// "Chưa vẽ" = chưa có video nào VÀ không nằm trong hàng đợi — đang render thì
+// coi như đã có người vẽ, không thì bấm "chưa vẽ" lần hai là xếp trùng.
+const chuaVe = t => !t.da_ve && !t.dang_ve;
+function tranhHien() {
+  if (art.loc === "chua") return art.list.filter(chuaVe);
+  if (art.loc === "da") return art.list.filter(t => !chuaVe(t));
+  return art.list;
+}
 function renderTranh() {
-  $("#tranhGrid").innerHTML = art.list.length ? art.list.map(t => `<div class="tranh ${t.name === art.pick ? "on" : ""}" data-n="${esc(t.name)}" title="${esc(t.name)}">
-      <img src="${t.url}" alt="" loading="lazy"><button class="x" type="button" data-del="${esc(t.name)}" title="Xoá ảnh">×</button></div>`).join("")
+  const nChua = art.list.filter(chuaVe).length;
+  $("#locAll").textContent = art.list.length;
+  $("#locChua").textContent = nChua;
+  $("#locDa").textContent = art.list.length - nChua;
+  const ds = tranhHien();
+  const nhan = t => t.dang_ve ? `<span class="ve dang" title="Đang chờ / đang render">⏳ đang vẽ</span>`
+    : t.da_ve ? `<span class="ve" title="Đã có ${t.da_ve} video vẽ tranh này">✓ đã vẽ${t.da_ve > 1 ? " ×" + t.da_ve : ""}</span>` : "";
+  $("#tranhGrid").innerHTML = ds.length ? ds.map(t => `<div class="tranh ${t.name === art.pick ? "on" : ""} ${chuaVe(t) ? "" : "da-ve"}" data-n="${esc(t.name)}" title="${esc(t.name)}">
+      <img src="${t.url}" alt="" loading="lazy">${nhan(t)}<button class="x" type="button" data-del="${esc(t.name)}" title="Xoá ảnh">×</button></div>`).join("")
+    : art.list.length ? `<div class="empty">${art.loc === "chua" ? "Tranh nào cũng vẽ rồi.<br>Tải thêm ảnh mới để vẽ tiếp." : "Chưa vẽ tranh nào."}</div>`
     : '<div class="empty">Chưa có tranh nào.<br>Kéo thả ảnh vào đây hoặc bấm “+ Tải ảnh lên”.</div>';
   $$("#tranhGrid .tranh").forEach(el => el.onclick = e => {
     if (e.target.dataset.del) return;
@@ -1210,7 +1236,9 @@ function renderTranh() {
     try { await api("/api/tranh/delete", {body: {name: b.dataset.del}}); toast("Đã xoá ảnh"); loadTranh(); } catch (e) { toast(e.message, true); }
   });
   const cur = art.list.find(t => t.name === art.pick);
-  if (cur) $("#tranhName").textContent = `Đang chọn: ${cur.name} · ${(cur.size / 1048576).toFixed(1)} MB · ${art.list.length} tranh trong thư mục`;
+  if (cur) $("#tranhName").textContent = `Đang chọn: ${cur.name} · ${(cur.size / 1048576).toFixed(1)} MB · `
+    + (cur.dang_ve ? "đang vẽ · " : cur.da_ve ? `đã vẽ ${cur.da_ve} video · ` : "chưa vẽ · ")
+    + `${art.list.length} tranh trong thư mục (${nChua} chưa vẽ)`;
   updateBatchHint();
 }
 function readFile(f) {
@@ -1238,6 +1266,9 @@ tg.ondragleave = () => tg.classList.remove("drop");
 tg.ondrop = e => { e.preventDefault(); tg.classList.remove("drop"); uploadTranh(e.dataTransfer.files); };
 $$("#artSpeed button").forEach(b => b.onclick = () => { art.speed = +b.dataset.s; $$("#artSpeed button").forEach(x => x.classList.toggle("on", x === b)); saveArt(); });
 $$("#artDur button").forEach(b => b.onclick = () => { art.dur = +b.dataset.d; $$("#artDur button").forEach(x => x.classList.toggle("on", x === b)); saveArt(); });
+$$("#tranhLoc button").forEach(b => b.onclick = () => {
+  art.loc = b.dataset.v; $$("#tranhLoc button").forEach(x => x.classList.toggle("on", x === b)); renderTranh();
+});
 $$("#artBatchWhich button").forEach(b => b.onclick = () => { art.batch = b.dataset.v; $$("#artBatchWhich button").forEach(x => x.classList.toggle("on", x === b)); updateBatchHint(); });
 $("#fCatTop").oninput = $("#fCatBot").oninput = () => {
   if (art.pick) art.cats[art.pick] = [+$("#fCatTop").value || 0, +$("#fCatBot").value || 0];
