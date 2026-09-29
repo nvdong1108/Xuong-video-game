@@ -45,6 +45,14 @@ aside { background: var(--side); color: var(--side-text); padding: 22px 14px; po
 .nav.active { background: var(--side-active); color: #fff; }
 .nav svg { width: 19px; height: 19px; flex: none; opacity: .85; }
 .nav .badge { margin-left: auto; background: var(--gem); color: #fff; border-radius: 99px; font-size: 11px; font-weight: 700; padding: 1px 8px; }
+.nav-head { display: flex; align-items: center; gap: 12px; padding: 10px 12px 4px; color: var(--side-text); font-weight: 600; }
+.nav-head svg { width: 19px; height: 19px; flex: none; opacity: .85; }
+.nav.sub { padding: 8px 12px 8px 42px; font-size: 14px; position: relative; }
+.nav.sub svg { width: 15px; height: 15px; }
+.nav.sub[data-g="kim-cuong"] svg { color: var(--gem); }
+.nav.sub[data-g="nong-trai"] svg { color: var(--farm); }
+.nav.sub[data-g="ve-tranh"] svg { color: var(--art); }
+.nav.sub.active::before { content: ""; position: absolute; left: 22px; top: 9px; bottom: 9px; width: 3px; border-radius: 3px; background: var(--accent); }
 .side-foot { margin-top: auto; font-size: 12px; color: var(--side-muted); padding: 10px 12px; line-height: 1.6; }
 .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--ok); }
 .dot.bad { background: var(--err); }
@@ -55,6 +63,10 @@ main { padding: 28px 32px 60px; max-width: 1360px; width: 100%; }
 @keyframes fade { from { opacity: 0; transform: translateY(4px); } }
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
 .page-head p { margin: 4px 0 0; color: var(--muted); }
+.create-head { display: flex; align-items: center; gap: 16px; }
+.create-head .gi { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
+.create-head .gi svg { width: 26px; height: 26px; }
+.crumb { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); }
 
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
 .grid-2 { display: grid; grid-template-columns: minmax(340px, 420px) 1fr; gap: 20px; align-items: start; }
@@ -65,6 +77,8 @@ main { padding: 28px 32px 60px; max-width: 1360px; width: 100%; }
 label.f { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin: 14px 0 6px; }
 label.f:first-child { margin-top: 0; }
 #speedBox label.f:first-child { margin-top: 18px; }
+#shortBox > label.f:first-child { margin-top: 14px; }
+#tranhName { overflow-wrap: anywhere; }
 input[type=text], input[type=number], select, textarea {
   width: 100%; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; outline: none; transition: border-color .15s, box-shadow .15s;
 }
@@ -88,18 +102,6 @@ textarea { resize: vertical; min-height: 64px; }
 .seg button { border: 0; background: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); font-size: 13.5px; }
 .seg button.on { background: var(--panel); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
 
-.games { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.games .game-card { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px; }
-.game-card { border: 2px solid var(--line); border-radius: 12px; padding: 12px; cursor: pointer; background: var(--panel-2); display: flex; gap: 10px; align-items: center; text-align: left; }
-.game-card .gi { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: none; }
-.game-card b { display: block; font-size: 14px; }
-.game-card span { font-size: 12px; color: var(--muted); }
-.game-card[data-g="kim-cuong"] .gi { background: var(--gem-soft); color: var(--gem); }
-.game-card[data-g="nong-trai"] .gi { background: var(--farm-soft); color: var(--farm); }
-.game-card.on[data-g="kim-cuong"] { border-color: var(--gem); }
-.game-card.on[data-g="nong-trai"] { border-color: var(--farm); }
-.game-card[data-g="ve-tranh"] .gi { background: var(--art-soft); color: var(--art); }
-.game-card.on[data-g="ve-tranh"] { border-color: var(--art); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .chip { border: 1px solid var(--line); background: var(--panel-2); border-radius: 99px; padding: 3px 11px; font-size: 12.5px; cursor: pointer; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -258,7 +260,11 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
       <svg width="30" height="30" viewBox="0 0 32 32"><path d="M16 3l11 10-11 16L5 13z" fill="#7c5cff"/><path d="M16 3l5 10H11z" fill="#b7a6ff"/></svg>
       <div>Xương<small>video · game</small></div>
     </div>
-    <button class="nav active" data-page="create"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>Tạo video</button>
+    <div class="nav-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>Tạo video</div>
+    <button class="nav sub active" data-page="create" data-g="kim-cuong"><svg viewBox="0 0 32 32"><path d="M16 3l11 10-11 16L5 13z" fill="currentColor"/></svg>Game kim cương</button>
+    <button class="nav sub" data-page="create" data-g="nong-trai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 21V11M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg>Game nông trại</button>
+    <button class="nav sub" data-page="create" data-g="ve-tranh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.4 2.6a2 2 0 0 1 2.9 2.9L11 15.8l-3.6.8.8-3.6z"/><path d="M7 17c-2 0-3.5 1.4-3.5 3.5h4c1.4 0 2.5-1.1 2.5-2.5"/></svg>Vẽ tranh</button>
+    <div class="nav-sep"></div>
     <button class="nav" data-page="scan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Dò seed</button>
     <button class="nav" data-page="queue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Hàng đợi<span class="badge" id="qbadge" hidden>0</span></button>
     <button class="nav" data-page="library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Thư viện</button>
@@ -274,18 +280,12 @@ tr.top td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
     <!-- ===================== TẠO VIDEO ===================== -->
     <section class="page active" id="page-create">
       <div class="page-head">
-        <div><h1>Tạo video</h1><p>Chọn game, seed và câu hook, xem thử vài khung hình rồi đưa vào hàng đợi render.</p></div>
+        <div class="create-head"><div class="gi" id="createIcon"></div>
+          <div><div class="crumb">Tạo video</div><h1 id="createTitle">Game kim cương</h1><p id="createDesc"></p></div></div>
       </div>
       <div class="grid-2">
         <div class="stack">
           <div class="card">
-            <label class="f">Game</label>
-            <div class="games" id="gamePick">
-              <button class="game-card on" data-g="kim-cuong"><div class="gi"><svg width="20" height="20" viewBox="0 0 32 32"><path d="M16 3l11 10-11 16L5 13z" fill="currentColor"/></svg></div><div><b>Kim Cương TEE</b><span>Bom · mưa bom</span></div></button>
-              <button class="game-card" data-g="nong-trai"><div class="gi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 21V11M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg></div><div><b>Nông Trại TEE</b><span>Làm giàu từ 40 xu</span></div></button>
-              <button class="game-card" data-g="ve-tranh"><div class="gi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.4 2.6a2 2 0 0 1 2.9 2.9L11 15.8l-3.6.8.8-3.6z"/><path d="M7 17c-2 0-3.5 1.4-3.5 3.5h4c1.4 0 2.5-1.1 2.5-2.5"/></svg></div><div><b>Vẽ Tranh TEE</b><span>Tự vẽ lại tranh</span></div></button>
-            </div>
-
             <div id="artBox" hidden>
               <div class="row" style="margin:14px 0 6px"><label class="f" style="margin:0">Tranh</label><div class="spacer"></div>
                 <button class="btn sm" id="btnTranhUp" type="button">+ Tải ảnh lên</button>
@@ -597,23 +597,33 @@ const art = { list: [], pick: "", speed: 1, dur: 0, batch: "all", loc: "all", ca
 const state = { info: null, game: "kim-cuong", speed: 1, tune: {}, theme: "dem", items: "kim-cuong", templates: [], jobs: [], library: [], stats: null, scan: null, scanSort: null, statsDirty: false };
 
 /* ---------------- điều hướng ---------------- */
-function go(page) {
-  $$(".nav").forEach(b => b.classList.toggle("active", b.dataset.page === page));
+function go(page, g) {
+  if (page === "create" && g && g !== state.game) setGame(g);
+  $$(".nav").forEach(b => b.classList.toggle("active", b.dataset.page === page && (!b.dataset.g || b.dataset.g === state.game)));
   $$(".page").forEach(p => p.classList.toggle("active", p.id === "page-" + page));
   if (page === "library") loadLibrary();
   if (page === "stats" && !state.stats) loadStats();
   if (page === "hooks") loadHooks();
   if (page === "queue") renderJobs();
   if (page === "kho") loadKho();
-  history.replaceState(null, "", "#" + page);
+  history.replaceState(null, "", "#" + (page === "create" ? "create/" + state.game : page));
 }
-$$(".nav").forEach(b => b.onclick = () => go(b.dataset.page));
+$$(".nav").forEach(b => b.onclick = () => go(b.dataset.page, b.dataset.g));
 
 /* ---------------- tạo video ---------------- */
+// Mỗi mục con của menu "Tạo video" là một trang riêng cho một game (dùng chung form bên dưới).
+const CREATE_PAGE = {
+  "kim-cuong": ["Game kim cương", "Ghép 3, bom, mưa bom. Chọn template giao diện, seed và câu hook, xem thử rồi đưa vào hàng đợi."],
+  "nong-trai": ["Game nông trại", "Gieo, thu hoạch, mở đất — làm giàu từ 40 xu. Chọn seed và câu hook, xem thử rồi đưa vào hàng đợi."],
+  "ve-tranh": ["Vẽ tranh", "Bút chì phác nét → cọ tô mảng → tô chi tiết. Không chữ, không tiếng — để ghép và lồng nhạc."],
+};
 function setGame(g, fillDefaults = true) {
   state.game = g;
   document.body.dataset.game = g;
-  $$("#gamePick .game-card").forEach(c => c.classList.toggle("on", c.dataset.g === g));
+  $("#createTitle").textContent = CREATE_PAGE[g][0];
+  $("#createDesc").textContent = CREATE_PAGE[g][1];
+  $("#createIcon").innerHTML = GAME_ICON[g];
+  $$(".nav.sub").forEach(b => b.classList.toggle("active", $("#page-create").classList.contains("active") && b.dataset.g === g));
   const def = state.info?.games[g];
   if (def && fillDefaults) {
     $("#fHook").value = def.hook;
@@ -632,7 +642,6 @@ function setGame(g, fillDefaults = true) {
   renderHookChips();
   updateBatchHint();
 }
-$$("#gamePick .game-card").forEach(c => c.onclick = () => setGame(c.dataset.g));
 
 function hooksFor(g) { return state.info?.hooks[g] || []; }
 function renderHookChips() {
@@ -1299,8 +1308,8 @@ restoreArt();
   if (g0 && i.games[g0]) setGame(g0);
   updateBatchHint();
   refreshJobs();
-  const page = location.hash.slice(1);
-  if (page && $("#page-" + page)) go(page);
+  const [page, sub] = location.hash.slice(1).split("/");     // #create/ve-tranh mở thẳng trang vẽ tranh
+  go(page && $("#page-" + page) ? page : "create", i.games[sub] ? sub : undefined);
 })();
 </script>
 </body>
