@@ -1,0 +1,39 @@
+XƯƠNG - VIDEO - GAME · HƯỚNG DẪN CHẠY TRÊN MÁY MỚI
+====================================================
+
+Không cần cài Python hay ffmpeg. Lần chạy ĐẦU TIÊN cần Internet, tự tải khoảng 200 MB
+(Python + thư viện + ffmpeg) vào thư mục .runtime bên trong. Từ lần sau mở ngay.
+
+Đặt thư mục ở chỗ cố định (Desktop, Documents...) rồi mới chạy — đừng chạy thẳng
+trong file zip hay trong thư mục tạm của trình giải nén.
+
+
+WINDOWS
+-------
+1. Chuột phải file zip → Extract All (Giải nén tất cả).
+   Nên giải nén vào chỗ đường dẫn ngắn, ví dụ D:\ hoặc Desktop. Windows lỗi
+   "Could not find a part of the path" khi đường dẫn quá dài (ảnh tên dài).
+2. Vào thư mục Xuong-video-game, bấm đúp CHAY-WINDOWS.bat
+   - Nếu hiện "Windows protected your PC": bấm "More info" → "Run anyway".
+3. Trình duyệt tự mở giao diện. Giữ cửa sổ đen dòng lệnh; đóng nó là tắt app.
+
+
+MACBOOK (M1/M2/M3)
+------------------
+1. Bấm đúp file zip để giải nén.
+2. Vào thư mục Xuong-video-game, bấm đúp CHAY-MAC.command
+   - LẦN ĐẦU macOS sẽ chặn ("không thể xác minh nhà phát triển"). Cách mở:
+     • Chuột phải (Control + bấm) CHAY-MAC.command → Open → Open.
+     • macOS 15 trở lên: bấm Done, rồi vào System Settings → Privacy & Security,
+       kéo xuống, bấm "Open Anyway" cạnh dòng CHAY-MAC.command, rồi bấm đúp lại.
+   - Cách dự phòng: mở Terminal, gõ   bash   (có dấu cách), kéo file CHAY-MAC.command
+     vào cửa sổ Terminal, nhấn Enter.
+3. Trình duyệt tự mở giao diện. Giữ cửa sổ Terminal; tắt nó (hoặc Ctrl+C) là tắt app.
+
+
+GHI CHÚ
+-------
+- Giao diện ở http://127.0.0.1:8765 — nếu trình duyệt không tự mở thì gõ địa chỉ này.
+- Video làm ra nằm trong thư mục output/.
+- Muốn gỡ: xoá cả thư mục là sạch, không để lại gì trong máy.
+- Muốn gửi tiếp cho máy khác: chạy   python dong_goi.py   (hoặc gửi lại file zip gốc).

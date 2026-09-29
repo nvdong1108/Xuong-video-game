@@ -957,6 +957,29 @@ class Handler(BaseHTTPRequestHandler):
 WORKERS = 2
 
 
+def dam_bao_ffmpeg() -> bool:
+    """Máy chưa cài ffmpeg (máy nhận file zip) → dùng bản đi kèm gói imageio-ffmpeg.
+
+    Chép ra .runtime/bin/ với đúng tên `ffmpeg` rồi thêm vào PATH: các bot và
+    tao_kho_nen đều tìm ffmpeg qua PATH, chạy trong tiến trình con thì thừa hưởng PATH này.
+    """
+    if shutil.which("ffmpeg"):
+        return True
+    try:
+        import imageio_ffmpeg
+        nguon = Path(imageio_ffmpeg.get_ffmpeg_exe())
+    except Exception:
+        return False
+    bin_dir = ROOT / ".runtime" / "bin"
+    dich = bin_dir / ("ffmpeg.exe" if sys.platform.startswith("win") else "ffmpeg")
+    if not dich.exists() or dich.stat().st_size != nguon.stat().st_size:
+        bin_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(nguon, dich)
+        dich.chmod(0o755)
+    os.environ["PATH"] = str(bin_dir) + os.pathsep + os.environ.get("PATH", "")
+    return True
+
+
 def main():
     global WORKERS
     if hasattr(sys.stdout, "reconfigure"):
@@ -968,6 +991,8 @@ def main():
     args = ap.parse_args()
     WORKERS = max(1, args.workers)
     OUTPUT.mkdir(exist_ok=True)
+    if not dam_bao_ffmpeg():
+        print("⚠ Không tìm thấy ffmpeg — vẫn mở giao diện được nhưng chưa render video được.")
     Handler.jobs = JobQueue(WORKERS)
     Handler.kho = KhoRunner()
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)

@@ -59,6 +59,22 @@ Trình duyệt tự mở `http://127.0.0.1:8765`. Tắt bằng Ctrl+C trong cử
 
 Video render từ giao diện được lưu vào `output/<ngày>/`, kèm file `.json` (seed, hook, tóm tắt ván) và ảnh bìa `.jpg`.
 
+## Gửi sang máy khác (Windows / Mac M1) bằng file zip
+
+```
+python dong_goi.py                 # → dist/Xuong-video-game_<ngày>.zip (bỏ output/, .git)
+python dong_goi.py --kem-output    # kèm video đã render
+```
+
+Máy nhận không cần cài Python hay ffmpeg: giải nén rồi bấm đúp **CHAY-WINDOWS.bat** hoặc
+**CHAY-MAC.command**. Lần đầu cần Internet: [uv](https://docs.astral.sh/uv/) tự tải Python 3.12,
+thư viện và ffmpeg (gói `imageio-ffmpeg`) vào `.runtime/` trong thư mục, khoảng 200 MB, không
+đụng gì tới máy. Chi tiết cho người nhận (kể cả cách vượt Gatekeeper trên Mac):
+[HUONG-DAN-CHAY.txt](HUONG-DAN-CHAY.txt).
+
+Đừng nén bằng "Send to → Compressed folder" của Windows: zip đó mất quyền chạy của
+`CHAY-MAC.command`.
+
 ## Chạy bằng dòng lệnh
 
 Chạy từ bất kỳ đâu, kết quả luôn nằm trong `output/`.

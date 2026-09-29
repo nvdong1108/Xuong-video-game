@@ -12,3 +12,5 @@ data/kho-nen.json
 assets/ve-tranh/tranh/*
 !assets/ve-tranh/tranh/.gitkeep
 data/ve-tranh.json
+.runtime/
+dist/
